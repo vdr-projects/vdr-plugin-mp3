@@ -53,6 +53,8 @@
 const char *sourcesSub=0;
 cFileSources MP3Sources;
 
+static const char *plugin_name=0;
+
 // --- cMenuSetupMP3 --------------------------------------------------------
 
 class cMenuSetupMP3 : public cMenuSetupPage {
@@ -72,7 +74,7 @@ cMenuSetupMP3::cMenuSetupMP3(void)
 {
   static const char allowed[] = { "abcdefghijklmnopqrstuvwxyz0123456789-_" };
   int numModes=0;
-  aout[numModes]=tr("DVB"); amodes[numModes]=AUDIOOUTMODE_DVB; numModes++;
+  aout[numModes]=trVDR("DVB"); amodes[numModes]=AUDIOOUTMODE_DVB; numModes++;
 #ifdef WITH_OSS
   aout[numModes]=tr("OSS"); amodes[numModes]=AUDIOOUTMODE_OSS; numModes++;
 #endif
@@ -698,7 +700,7 @@ void cMP3Control::DisplayInfo(const char *s)
 void cMP3Control::JumpDisplay(void)
 {
   char buf[64];
-  const char *j=tr("Jump: "), u=jumpsecs?'s':'m';
+  const char *j=trVDR("Jump: "), u=jumpsecs?'s':'m';
   if(!jumpmm) sprintf(buf,"%s- %c",  j,u);
   else        sprintf(buf,"%s%d- %c",j,jumpmm,u);
 #if APIVERSNUM >= 10307
@@ -845,7 +847,7 @@ eOSState cMP3Control::ProcessKey(eKeys Key)
     case kBack:
       Hide();
 #if APIVERSNUM >= 10332
-      cRemote::CallPlugin(i18n_name);
+      cRemote::CallPlugin(plugin_name);
       return osBack;
 #else
       return osEnd;
@@ -859,7 +861,7 @@ eOSState cMP3Control::ProcessKey(eKeys Key)
         char buf[32];
 #if APIVERSNUM >= 10307
         if(MP3Setup.ReplayDisplay) {
-          snprintf(buf,sizeof(buf),"%s%d-/%d",tr("Jump: "),number,lastMode->MaxNum);
+          snprintf(buf,sizeof(buf),"%s%d-/%d",trVDR("Jump: "),number,lastMode->MaxNum);
           disp->SetJump(buf);
           }
         else {
@@ -942,7 +944,7 @@ void cMenuID3Info::Build(cSongInfo *si, const char *name)
       Item(tr("Year"),0,(float)si->Year);
       Item(tr("Samplerate"),"%.1f kHz",si->SampleFreq/1000.0);
       Item(tr("Bitrate"),"%.f kbit/s",si->Bitrate/1000.0);
-      Item(tr("Channels"),0,(float)si->Channels);
+      Item(trVDR("Channels"),0,(float)si->Channels);
       }
     Display();
     }
@@ -1117,7 +1119,7 @@ cMenuPlayList::cMenuPlayList(cPlayList *Playlist)
 
 void cMenuPlayList::Buttons(void)
 {
-  SetHelp(tr("Add"), showid3?tr("Filenames"):tr("ID3 names"), tr("Remove"), tr(BUTTON"Mark"));
+  SetHelp(tr("Add"), showid3?tr("Filenames"):tr("ID3 names"), tr("Remove"), trVDR(BUTTON"Mark"));
 }
 
 void cMenuPlayList::Refresh(bool all)
@@ -1339,10 +1341,10 @@ eOSState cMenuMP3::SetButtons(int num)
 {
   switch(num) {
     case 1:
-      SetHelp(tr(BUTTON"Edit"), tr("Source"), tr("Browse"), ">>");
+      SetHelp(trVDR(BUTTON"Edit"), tr("Source"), tr("Browse"), ">>");
       break;
     case 2:
-      SetHelp("<<", tr(BUTTON"New"), tr(BUTTON"Delete"), tr("Rename"));
+      SetHelp("<<", trVDR(BUTTON"New"), trVDR(BUTTON"Delete"), tr("Rename"));
       break;
     }
   buttonnum=num; Display();
@@ -1481,7 +1483,7 @@ eOSState cMenuMP3::Instant(bool second)
 
   if(!second) {
     instanting=true;
-    return AddSubMenu(new cMenuInstantBrowse(MP3Sources.GetSource(),tr(BUTTON"Play"),tr("Play all")));
+    return AddSubMenu(new cMenuInstantBrowse(MP3Sources.GetSource(),trVDR(BUTTON"Play"),tr("Play all")));
     }
   instanting=false;
   cFileObj *item=cMenuInstantBrowse::GetSelected();
@@ -1536,7 +1538,7 @@ void PropagateImage(const char *image)
 // --- cPluginMP3 --------------------------------------------------------------
 
 static const char *VERSION        = PLUGIN_VERSION;
-static const char *DESCRIPTION    = "A versatile audio player";
+static const char *DESCRIPTION    = trNOOP("A versatile audio player");
 static const char *MAINMENUENTRY  = "MP3";
 
 class cPluginMp3 : public cPlugin {
@@ -1579,7 +1581,7 @@ cPluginMp3::cPluginMp3(void)
 
 cPluginMp3::~cPluginMp3()
 {
-  InfoCache.Save();
+  InfoCache.Shutdown();
   delete mgr;
 }
 
@@ -1673,7 +1675,12 @@ bool cPluginMp3::Start(void)
 #endif
 {
   if(!CheckVDRVersion(1,1,29,"mp3")) return false;
-  i18n_name=Name();
+  plugin_name="mp3";
+#if APIVERSNUM < 10507
+  i18n_name="mp3";
+#else
+  i18n_name="vdr-mp3";
+#endif
   MP3Sources.Load(AddDirectory(ConfigDirectory(sourcesSub),"mp3sources.conf"));
   if(MP3Sources.Count()<1) {
      esyslog("ERROR: you should have defined at least one source in mp3sources.conf");
@@ -1681,7 +1688,9 @@ bool cPluginMp3::Start(void)
      return false;
      }
   InfoCache.Load();
+#if APIVERSNUM < 10507
   RegisterI18n(Phrases);
+#endif
   mgr=new cPlayManager;
   if(!mgr) {
     esyslog("ERROR: creating playmanager failed");

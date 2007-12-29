@@ -1,7 +1,7 @@
 /*
  * MP3/MPlayer plugin to VDR (C++)
  *
- * (C) 2001-2005 Stefan Huelswitt <s.huelswitt@gmx.de>
+ * (C) 2001-2007 Stefan Huelswitt <s.huelswitt@gmx.de>
  *
  * This code is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -460,6 +460,12 @@ cInfoCache::cInfoCache(void)
   lastpurge=time(0)-(50*60);
 }
 
+void cInfoCache::Shutdown(void)
+{
+  Cancel(10);
+  Save(true);
+}
+
 void cInfoCache::Cache(cSongInfo *info, cFileInfo *file)
 {
   lock.Lock();
@@ -569,7 +575,7 @@ char *cInfoCache::CacheFile(void)
 
 void cInfoCache::Save(bool force)
 {
-  if(!Purge() && modified && (force || time(0)>lasttime)) {
+  if(modified && (force || (!Purge() && time(0)>lasttime))) {
     char *name=CacheFile();
     cSafeFile f(name);
     free(name);

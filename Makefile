@@ -1,7 +1,7 @@
 #
 # MP3/MPlayer plugin to VDR
 #
-# (C) 2001-2006 Stefan Huelswitt <s.huelswitt@gmx.de>
+# (C) 2001-2007 Stefan Huelswitt <s.huelswitt@gmx.de>
 #
 # This code is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -97,9 +97,15 @@ DEFINES  += -D_GNU_SOURCE -DAPIVERSNUM=$(APIVERSNUM)
 
 ifndef WITHOUT_MP3
   ALL += libvdr-$(PLUGIN).so
+  ifneq ($(shell grep -l 'Phrases' $(VDRDIR)/i18n.c),$(VDRDIR)/i18n.c)
+    ALL += i18n-$(PLUGIN)
+  endif
 endif
 ifndef WITHOUT_MPLAYER
   ALL += libvdr-$(PLUGIN2).so
+  ifneq ($(shell grep -l 'Phrases' $(VDRDIR)/i18n.c),$(VDRDIR)/i18n.c)
+    ALL += i18n-$(PLUGIN2)
+  endif
 endif
 
 COM_OBJS = i18n.o data.o menu.o
@@ -134,13 +140,17 @@ ifeq ($(shell test -f $(VDRDIR)/fontsym.h ; echo $$?),0)
 endif  
 
 ifdef DBG
-CXXFLAGS += -g
+  CXXFLAGS += -g
 endif
 
-### Implicit rules:
+### Internationalization (I18N):
 
-%.o: %.c
-	$(CXX) $(CXXFLAGS) -c $(DEFINES) $(INCLUDES) $<
+PODIR     = po
+I18Npot   = $(PODIR)/mp3-mplayer.pot
+I18Npots  = $(notdir $(foreach file, $(wildcard $(PODIR)/*.po), $(basename $(file))))
+I18Nmsgs  = $(addprefix $(LOCALEDIR)/,$(addsuffix /LC_MESSAGES/vdr-$(PLUGIN).mo,$(I18Npots)))
+I18Nmsgs2 = $(addprefix $(LOCALEDIR)/,$(addsuffix /LC_MESSAGES/vdr-$(PLUGIN2).mo,$(I18Npots)))
+LOCALEDIR = $(VDRDIR)/locale
 
 # Dependencies:
 
@@ -154,6 +164,10 @@ $(DEPFILE): Makefile
 ### Targets:
 
 all: $(ALL)
+.PHONY: i18n-$(PLUGIN) i18n-$(PLUGIN2)
+
+%.o: %.c
+	$(CXX) $(CXXFLAGS) -c $(DEFINES) $(INCLUDES) $<
 
 libvdr-$(PLUGIN).so: $(OBJS)
 	$(CXX) $(CXXFLAGS) -shared $(OBJS) $(LIBS) -o $@
@@ -163,8 +177,27 @@ libvdr-$(PLUGIN2).so: $(OBJS2)
 	$(CXX) $(CXXFLAGS) -shared $(OBJS2) $(LIBS2) -o $@
 	@cp $@ $(LIBDIR)/$@.$(APIVERSION)
 
-i18ntest: i18ntest.c i18n.c i18n.h
-	$(CXX) $(CXXFLAGS) $(INCLUDES) $< -o $@
+$(I18Npot): $(shell grep -rl '\(tr\|trNOOP\)(\".*\")' *.c $(SYSDIR))
+	xgettext -C -cTRANSLATORS --no-wrap -F -k -ktr -ktrNOOP --msgid-bugs-address='<s.huelswitt@gmx.de>' -o $@ $^
+
+%.po: $(I18Npot)
+	msgmerge -U --no-wrap -F --backup=none -q $@ $<
+	@touch $@
+
+%.mo: %.po
+	msgfmt -c -o $@ $<
+
+$(I18Nmsgs): $(LOCALEDIR)/%/LC_MESSAGES/vdr-$(PLUGIN).mo: $(PODIR)/%.mo
+	@mkdir -p $(dir $@)
+	cp $< $@
+
+i18n-$(PLUGIN): $(I18Nmsgs)
+
+$(I18Nmsgs2): $(LOCALEDIR)/%/LC_MESSAGES/vdr-$(PLUGIN2).mo: $(PODIR)/%.mo
+	@mkdir -p $(dir $@)
+	cp $< $@
+
+i18n-$(PLUGIN2): $(I18Nmsgs2)
 
 dist: clean
 	@-rm -rf $(TMPDIR)/$(ARCHIVE)
@@ -175,4 +208,5 @@ dist: clean
 	@echo Distribution package created as $(PACKAGE).tar.gz
 
 clean:
-	@-rm -f $(OBJS) $(OBJS2) $(DEPFILE) i18ntest libvdr-*.so $(PACKAGE).tar.gz core* *~
+	@-rm -f $(OBJS) $(OBJS2) $(DEPFILE) libvdr-*.so $(PACKAGE).tar.gz core* *~
+	@-rm -f $(PODIR)/*.mo $(PODIR)/*.pot

@@ -1,7 +1,7 @@
 /*
  * MP3/MPlayer plugin to VDR (C++)
  *
- * (C) 2001-2005 Stefan Huelswitt <s.huelswitt@gmx.de>
+ * (C) 2001-2007 Stefan Huelswitt <s.huelswitt@gmx.de>
  *
  * This code is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -25,9 +25,19 @@
 #include <vdr/i18n.h>
 
 extern const char *i18n_name;
+
+#if APIVERSNUM < 10507
 extern const tI18nPhrase Phrases[];
+#endif
 
 #undef tr
 #define tr(s)  I18nTranslate(s, i18n_name)
+
+#ifndef trNOOP
+#define trNOOP(s) (s)
+#endif
+#ifndef trVDR
+#define trVDR(s)  tr(s)
+#endif
 
 #endif //___I18N_H

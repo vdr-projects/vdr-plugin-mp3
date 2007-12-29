@@ -1,6 +1,10 @@
 VDR Plugin Revision History
 ---------------------------
 
+27.08.2007: Version 0.10.1 (vdr 1.4.7 / 1.5.9)
+- Fixed segfault in MP3 infocache purge on plugin exit.
+- Added support for VDR 1.5.7+ gettext internationalization.
+
 17.06.2007: Version 0.10.0 (vdr 1.4.7 / 1.5.2)
 - Fixed directory scaning in file browser if remembered directory has been
   removed meanwhile. Reported by Halim Sahin.

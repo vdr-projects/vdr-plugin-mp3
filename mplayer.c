@@ -76,6 +76,8 @@ public:
 const char *sourcesSub=0;
 cFileSources MPlaySources;
 
+static const char *plugin_name=0;
+
 // --- cMenuSetupMPlayer --------------------------------------------------------
 
 class cMenuSetupMPlayer : public cMenuSetupPage {
@@ -416,7 +418,7 @@ void cMPlayerControl::ShowMode(void)
 void cMPlayerControl::JumpDisplay(void)
 {
   char buf[64];
-  const char *j=tr("Jump: "), u=jumpmode?'%':'m';
+  const char *j=trVDR("Jump: "), u=jumpmode?'%':'m';
   if(!jumpval) sprintf(buf,"%s- %c",  j,u);
   else         sprintf(buf,"%s%d- %c",j,jumpval,u);
 #if APIVERSNUM >= 10307
@@ -539,7 +541,7 @@ eOSState cMPlayerControl::ProcessKey(eKeys Key)
       case kBack:
 #if APIVERSNUM >= 10332
                      Hide();
-                     cRemote::CallPlugin(i18n_name);
+                     cRemote::CallPlugin(plugin_name);
                      return osBack;
 #endif
       case kStop:
@@ -629,7 +631,7 @@ void cMenuMPlayBrowse::SetButtons(void)
 {
   static char blue[12];
   snprintf(blue,sizeof(blue),MPlayerAid>=0 ? "AID:%d" : "AID:def",MPlayerAid);
-  SetHelp(tr(BUTTON"Play"), MPlayerSetup.ResumeMode ? tr(BUTTON"Rewind"):0, tr("Source"), blue);
+  SetHelp(trVDR(BUTTON"Play"), MPlayerSetup.ResumeMode ? trVDR(BUTTON"Rewind"):0, tr("Source"), blue);
   Display();
 }
 
@@ -727,7 +729,7 @@ eOSState cMenuMPlayBrowse::ProcessKey(eKeys Key)
 // --- cPluginMPlayer ----------------------------------------------------------
 
 static const char *VERSION        = PLUGIN_VERSION;
-static const char *DESCRIPTION    = "Media replay via MPlayer";
+static const char *DESCRIPTION    = trNOOP("Media replay via MPlayer");
 static const char *MAINMENUENTRY  = "MPlayer";
 
 class cPluginMPlayer : public cPlugin {
@@ -824,14 +826,21 @@ bool cPluginMPlayer::Start(void)
 #endif
 {
   if(!CheckVDRVersion(1,1,16,"mplayer")) return false;
-  i18n_name=Name();
+  plugin_name="mplayer";
+#if APIVERSNUM < 10507
+  i18n_name="mplayer";
+#else
+  i18n_name="vdr-mplayer";
+#endif
   MPlaySources.Load(AddDirectory(ConfigDirectory(sourcesSub),"mplayersources.conf"));
   if(MPlaySources.Count()<1) {
     esyslog("ERROR: you must have defined at least one source in mplayersources.conf");
     fprintf(stderr,"No source(s) defined in mplayersources.conf\n");
     return false;
     }
+#if APIVERSNUM < 10507
   RegisterI18n(Phrases);
+#endif
   if(!(status=new cMPlayerStatus)) return false;
   return true;
 }

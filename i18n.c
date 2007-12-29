@@ -1,7 +1,7 @@
 /*
  * MP3/MPlayer plugin to VDR (C++)
  *
- * (C) 2001-2006 Stefan Huelswitt <s.huelswitt@gmx.de>
+ * (C) 2001-2007 Stefan Huelswitt <s.huelswitt@gmx.de>
  *
  * This code is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -23,6 +23,8 @@
 #include "i18n.h"
 
 const char *i18n_name = 0;
+
+#if APIVERSNUM < 10507
 
 const tI18nPhrase Phrases[] = {
 /*
@@ -2307,3 +2309,5 @@ const tI18nPhrase Phrases[] = {
 
   { NULL }
   };
+
+#endif

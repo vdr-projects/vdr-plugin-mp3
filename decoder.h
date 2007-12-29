@@ -1,7 +1,7 @@
 /*
  * MP3/MPlayer plugin to VDR (C++)
  *
- * (C) 2001-2005 Stefan Huelswitt <s.huelswitt@gmx.de>
+ * (C) 2001-2007 Stefan Huelswitt <s.huelswitt@gmx.de>
  *
  * This code is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -148,6 +148,7 @@ protected:
   virtual void Action(void);
 public:
   cInfoCache(void);
+  void Shutdown(void);
   void Save(bool force=false);
   void Load(void);
   bool Purge(void);

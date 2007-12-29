@@ -23,6 +23,6 @@
 #define ___VERSION_H
 
 #define PLUGIN_NAME    "VDR-MP3"
-#define PLUGIN_VERSION "0.10.0"
+#define PLUGIN_VERSION "0.10.1"
 
 #endif //___VERSION_H
