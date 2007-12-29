@@ -73,7 +73,7 @@ void cOggFile::Close(void)
 
 void cOggFile::Error(const char *action, const int err)
 {
-  char *errstr;
+  const char *errstr;
   switch(err) {
     case OV_FALSE:      errstr="false/no data available"; break;
     case OV_EOF:        errstr="EOF"; break;

@@ -643,7 +643,7 @@ private:
   bool RemoteGet(cDiscID *id);
   bool GetLine(char *buff, int size, bool log=true);
   int GetCddbResponse(void);
-  int DoCddbCmd(char *format, ...);
+  int DoCddbCmd(const char *format, ...);
 public:
   cCDDB(void);
   virtual ~cCDDB();
@@ -706,8 +706,8 @@ bool cCDDB::RemoteGet(cDiscID *id)
   if(net->Connect(MP3Setup.CddbHost,MP3Setup.CddbPort)) {
     int code=GetCddbResponse();
     if(code/100==2) {
-      char *host=getenv("HOSTNAME"); if(!host) host="unknown";
-      char *user=getenv("USER"); if(!user) user="nobody";
+      const char *host=getenv("HOSTNAME"); if(!host) host="unknown";
+      const char *user=getenv("USER"); if(!user) user="nobody";
       code=DoCddbCmd("cddb hello %s %s %s %s\n",user,host,PLUGIN_NAME,PLUGIN_VERSION);
       if(code/100==2) {
         code=DoCddbCmd("proto %d\n",CDDB_PROTO);
@@ -783,7 +783,7 @@ int cCDDB::GetCddbResponse(void)
   return -1;
 }
 
-int cCDDB::DoCddbCmd(char *format, ...)
+int cCDDB::DoCddbCmd(const char *format, ...)
 {
   va_list ap;
   va_start(ap,format);

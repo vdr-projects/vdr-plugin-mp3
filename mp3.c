@@ -195,7 +195,7 @@ void cAsyncStatus::Finish(void)
 static const char *TitleArtist(const char *title, const char *artist)
 {
   static char buf[256]; // clearly not multi-thread save!
-  char *fmt;
+  const char *fmt;
   if(artist && artist[0]) {
     if(MP3Setup.TitleArtistOrder) fmt="%2$s - %1$s";
     else  fmt="%s - %s";

@@ -955,7 +955,7 @@ bool cPlayManager::Info(int num, cMP3PlayInfo *pi)
     strn0cpy(pi->Filename,s->FullPath(),sizeof(pi->Filename));
     cSongInfo *si=s->Info(false);
     if(si && si->HasInfo()) {
-      static char *modestr[] = { "Mono","Dual","Joint-Stereo","Stereo" };
+      static const char *modestr[] = { "Mono","Dual","Joint-Stereo","Stereo" };
 
       if(si->Title)  strn0cpy(pi->Title,si->Title,sizeof(pi->Title));
       if(si->Artist) strn0cpy(pi->Artist,si->Artist,sizeof(pi->Artist));

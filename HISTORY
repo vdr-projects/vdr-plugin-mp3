@@ -2,6 +2,7 @@ VDR Plugin Revision History
 ---------------------------
 
 ..2007: Version 0.10.2 (vdr 1.4.7 / 1.5.11)
+- Fixed some gcc 4.x warnings.
 - Removed line number references from *.po files.
 
 27.08.2007: Version 0.10.1 (vdr 1.4.7 / 1.5.9)
