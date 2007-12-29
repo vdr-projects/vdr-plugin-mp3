@@ -6,6 +6,8 @@ VDR Plugin Revision History
   reporting.
 - Fixed some gcc 4.x warnings.
 - Removed line number references from *.po files.
+- Backward compatible on-the-fly creation of the i18n.c file using Udo Richter's
+  po2i18n package.
 - Added italian translations.
 
 27.08.2007: Version 0.10.1 (vdr 1.4.7 / 1.5.9)

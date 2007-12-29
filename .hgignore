@@ -9,3 +9,4 @@ po/*.pot
 *.rej
 *.bak
 version.c
+i18n.c

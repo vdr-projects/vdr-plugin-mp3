@@ -74,13 +74,13 @@ VERSION := $(shell if test -d .hg; then echo -n '$(RELEASE)-'; (hg identify 2>/d
 
 ### The version number of VDR (taken from VDR's "config.h"):
 
-VDRVERSION := $(shell sed -ne '/define VDRVERSION/ s/^.*"\(.*\)".*$$/\1/p' $(VDRDIR)/config.h)
-APIVERSION := $(shell sed -ne '/define APIVERSION/ s/^.*"\(.*\)".*$$/\1/p' $(VDRDIR)/config.h)
+VDRVERSION := $(shell sed -ne '/define VDRVERSION/ s/^.*"\(.*\)".*$$/\1/p' $(VDRDIR)/include/vdr/config.h)
+APIVERSION := $(shell sed -ne '/define APIVERSION/ s/^.*"\(.*\)".*$$/\1/p' $(VDRDIR)/include/vdr/config.h)
 ifeq ($(strip $(APIVERSION)),)
    APIVERSION = $(VDRVERSION)
 endif
-VDRVERSNUM := $(shell sed -ne '/define VDRVERSNUM/ s/^.[a-zA-Z ]*\([0-9]*\) .*$$/\1/p' $(VDRDIR)/config.h)
-APIVERSNUM := $(shell sed -ne '/define APIVERSNUM/ s/^.[a-zA-Z ]*\([0-9]*\) .*$$/\1/p' $(VDRDIR)/config.h)
+VDRVERSNUM := $(shell sed -ne '/define VDRVERSNUM/ s/^.[a-zA-Z ]*\([0-9]*\) .*$$/\1/p' $(VDRDIR)/include/vdr/config.h)
+APIVERSNUM := $(shell sed -ne '/define APIVERSNUM/ s/^.[a-zA-Z ]*\([0-9]*\) .*$$/\1/p' $(VDRDIR)/include/vdr/config.h)
 ifeq ($(strip $(APIVERSNUM)),)
    APIVERSNUM = $(VDRVERSNUM)
 endif
@@ -97,20 +97,7 @@ DEFINES  += -D_GNU_SOURCE -DAPIVERSNUM=$(APIVERSNUM)
 
 ### The object files (add further files here):
 
-ifndef WITHOUT_MP3
-  ALL += libvdr-$(PLUGIN).so
-  ifneq ($(shell grep -l 'Phrases' $(VDRDIR)/i18n.c),$(VDRDIR)/i18n.c)
-    ALL += i18n-$(PLUGIN)
-  endif
-endif
-ifndef WITHOUT_MPLAYER
-  ALL += libvdr-$(PLUGIN2).so
-  ifneq ($(shell grep -l 'Phrases' $(VDRDIR)/i18n.c),$(VDRDIR)/i18n.c)
-    ALL += i18n-$(PLUGIN2)
-  endif
-endif
-
-COM_OBJS = i18n.o data.o menu.o version.o
+COM_OBJS = data.o menu.o version.o
 
 OBJS     = $(PLUGIN).o $(COM_OBJS)\
             data-mp3.o setup-mp3.o player-mp3.o stream.o network.o\
@@ -149,22 +136,47 @@ endif
 
 PODIR     = po
 I18Npot   = $(PODIR)/mp3-mplayer.pot
-I18Npots  = $(notdir $(foreach file, $(wildcard $(PODIR)/*.po), $(basename $(file))))
-I18Nmsgs  = $(addprefix $(LOCALEDIR)/,$(addsuffix /LC_MESSAGES/vdr-$(PLUGIN).mo,$(I18Npots)))
-I18Nmsgs2 = $(addprefix $(LOCALEDIR)/,$(addsuffix /LC_MESSAGES/vdr-$(PLUGIN2).mo,$(I18Npots)))
+I18Npots  := $(notdir $(foreach file, $(wildcard $(PODIR)/*.po), $(basename $(file))))
+ifeq ($(strip $(APIVERSION)),1.5.7)
+  I18Nmo  = $(PLUGIN).mo
+  I18Nmo2 = $(PLUGIN2).mo
+else
+  I18Nmo  = vdr-$(PLUGIN).mo
+  I18Nmo2 = vdr-$(PLUGIN2).mo
+endif
 LOCALEDIR = $(VDRDIR)/locale
+I18Nmsgs  := $(addprefix $(LOCALEDIR)/,$(addsuffix /LC_MESSAGES/$(I18Nmo),$(I18Npots)))
+I18Nmsgs2 := $(addprefix $(LOCALEDIR)/,$(addsuffix /LC_MESSAGES/$(I18Nmo2),$(I18Npots)))
+
+HASLOCALE = $(shell grep -l 'I18N_DEFAULT_LOCALE' $(VDRDIR)/include/vdr/i18n.h)
+ifeq ($(strip $(HASLOCALE)),)
+  COM_OBJS += i18n.o
+endif
 
 # Dependencies:
 
 MAKEDEP = g++ -MM -MG
 DEPFILE = .dependencies
-DEPFILES = $(subst version.c,,$(OBJS:%.o=%.c) $(OBJS2:%.o=%.c))
+DEPFILES = $(subst i18n.c,,$(subst version.c,,$(OBJS:%.o=%.c) $(OBJS2:%.o=%.c)))
 $(DEPFILE): Makefile $(DEPFILES) $(wildcard *.h)
 	@$(MAKEDEP) $(DEFINES) $(INCLUDES) $(DEPFILES) > $@
 
 -include $(DEPFILE)
 
 ### Targets:
+
+ifndef WITHOUT_MP3
+  ALL += libvdr-$(PLUGIN).so
+  ifneq ($(strip $(HASLOCALE)),)
+    ALL += i18n-$(PLUGIN)
+  endif
+endif
+ifndef WITHOUT_MPLAYER
+  ALL += libvdr-$(PLUGIN2).so
+  ifneq ($(strip $(HASLOCALE)),)
+    ALL += i18n-$(PLUGIN2)
+  endif
+endif
 
 all: $(ALL)
 .PHONY: i18n-$(PLUGIN) i18n-$(PLUGIN2)
@@ -190,17 +202,20 @@ $(I18Npot): $(shell grep -rl '\(tr\|trNOOP\)(\".*\")' *.c )
 %.mo: %.po
 	msgfmt -c -o $@ $<
 
-$(I18Nmsgs): $(LOCALEDIR)/%/LC_MESSAGES/vdr-$(PLUGIN).mo: $(PODIR)/%.mo
+$(I18Nmsgs): $(LOCALEDIR)/%/LC_MESSAGES/$(I18Nmo): $(PODIR)/%.mo
 	@mkdir -p $(dir $@)
 	cp $< $@
 
 i18n-$(PLUGIN): $(I18Nmsgs)
 
-$(I18Nmsgs2): $(LOCALEDIR)/%/LC_MESSAGES/vdr-$(PLUGIN2).mo: $(PODIR)/%.mo
+$(I18Nmsgs2): $(LOCALEDIR)/%/LC_MESSAGES/$(I18Nmo2): $(PODIR)/%.mo
 	@mkdir -p $(dir $@)
 	cp $< $@
 
 i18n-$(PLUGIN2): $(I18Nmsgs2)
+
+i18n.c: $(PODIR)/*.po i18n-template.c po2i18n.pl
+	perl ./po2i18n.pl <i18n-template.c >i18n.c
 
 version.c: FORCE
 	@echo >$@.new "/* this file will be overwritten without warning */"; \
@@ -219,7 +234,7 @@ dist: clean
 
 clean:
 	@-rm -f $(OBJS) $(OBJS2) $(DEPFILE) libvdr-*.so $(PACKAGE).tar.gz core* *~
-	@-rm -f version.c
+	@-rm -f version.c i18n.c
 	@-rm -f $(PODIR)/*.mo
 
 FORCE:
