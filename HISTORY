@@ -2,6 +2,8 @@ VDR Plugin Revision History
 ---------------------------
 
 ..2007: Version 0.10.2 (vdr 1.4.7 / 1.5.11)
+- Fixed a segfault while direct song selection. Thanks to Halim Sahin for
+  reporting.
 - Fixed some gcc 4.x warnings.
 - Removed line number references from *.po files.
 

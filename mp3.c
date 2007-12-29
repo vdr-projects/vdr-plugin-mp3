@@ -232,7 +232,7 @@ private:
   bool visible, shown, bigwin, statusActive;
   time_t timeoutShow, greentime, oktime;
   int lastkeytime, number;
-  bool selecting, selecthide;
+  bool selecting;
   //
   cMP3PlayInfo *lastMode;
   time_t fliptime, listtime;
@@ -269,7 +269,7 @@ public:
 cMP3Control::cMP3Control(void)
 :cControl(player=new cMP3Player)
 {
-  visible=shown=bigwin=selecting=selecthide=jumpactive=jumphide=statusActive=false;
+  visible=shown=bigwin=selecting=jumpactive=jumphide=statusActive=false;
   timeoutShow=greentime=oktime=0;
   lastkeytime=number=0;
   lastMode=0;
@@ -330,13 +330,14 @@ void cMP3Control::ShowTimed(int Seconds)
 {
   if(!visible) {
     ShowProgress(true);
-    if(Seconds>0) timeoutShow=time(0)+Seconds;
+    timeoutShow=(Seconds>0) ? time(0)+Seconds : 0;
     }
 }
 
 void cMP3Control::Hide(void)
 {
   HideStatus();
+  timeoutShow=0;
   if(visible) {
 #if APIVERSNUM >= 10307
     delete osd; osd=0;
@@ -765,7 +766,7 @@ eOSState cMP3Control::ProcessKey(eKeys Key)
 {
   if(!player->Active()) return osEnd;
 
-  if(visible && timeoutShow && time(0)>timeoutShow) { Hide(); timeoutShow=0; }
+  if(timeoutShow && time(0)>timeoutShow) Hide();
   ShowProgress();
 #if APIVERSNUM >= 10307
   ShowStatus(Key==kNone && !Skins.IsOpen());
@@ -856,7 +857,8 @@ eOSState cMP3Control::ProcessKey(eKeys Key)
     case k0 ... k9:
       number=number*10+Key-k0;
       if(lastMode && number>0 && number<=lastMode->MaxNum) {
-        if(!visible) { ShowTimed(); selecthide=true; }
+        if(!visible) ShowTimed(SELECTHIDE_TIMEOUT);
+        else if(timeoutShow>0) timeoutShow=time(0)+SELECTHIDE_TIMEOUT;
         selecting=true; lastkeytime=time_ms();
         char buf[32];
 #if APIVERSNUM >= 10307
@@ -879,11 +881,10 @@ eOSState cMP3Control::ProcessKey(eKeys Key)
     case kNone:
       if(selecting && time_ms()-lastkeytime>SELECT_TIMEOUT) {
         if(number>0) { mgr->Goto(number); player->Play();  }
-        if(selecthide) timeoutShow=time(0)+SELECTHIDE_TIMEOUT;
         if(lastMode) lastMode->Hash=-1;
-        number=0; selecting=selecthide=false;
+        number=0; selecting=false;
 #if APIVERSNUM >= 10307
-        if(MP3Setup.ReplayDisplay) disp->SetJump(0);
+        if(MP3Setup.ReplayDisplay && disp) disp->SetJump(0);
 #endif
         }
       break;
