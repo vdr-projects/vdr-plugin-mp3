@@ -1,0 +1,10 @@
+syntax: glob
+*.o
+*.so
+*.tar.gz
+.dependencies
+po/*.mo
+po/*.pot
+*.orig
+*.rej
+*.bak
