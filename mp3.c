@@ -1538,7 +1538,6 @@ void PropagateImage(const char *image)
 
 // --- cPluginMP3 --------------------------------------------------------------
 
-static const char *VERSION        = PLUGIN_VERSION;
 static const char *DESCRIPTION    = trNOOP("A versatile audio player");
 static const char *MAINMENUENTRY  = "MP3";
 
@@ -1550,7 +1549,7 @@ private:
 public:
   cPluginMp3(void);
   virtual ~cPluginMp3();
-  virtual const char *Version(void) { return VERSION; }
+  virtual const char *Version(void) { return PluginVersion; }
   virtual const char *Description(void) { return tr(DESCRIPTION); }
   virtual const char *CommandLineHelp(void);
   virtual bool ProcessArgs(int argc, char *argv[]);

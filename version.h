@@ -1,7 +1,7 @@
 /*
  * MP3/MPlayer plugin to VDR (C++)
  *
- * (C) 2001-2006 Stefan Huelswitt <s.huelswitt@gmx.de>
+ * (C) 2001-2007 Stefan Huelswitt <s.huelswitt@gmx.de>
  *
  * This code is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -23,6 +23,8 @@
 #define ___VERSION_H
 
 #define PLUGIN_NAME    "VDR-MP3"
-#define PLUGIN_VERSION "0.10.1"
+#define PLUGIN_RELEASE "0.10.1"
+
+extern const char *PluginVersion;
 
 #endif //___VERSION_H

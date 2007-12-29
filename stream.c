@@ -1,7 +1,7 @@
 /*
  * MP3/MPlayer plugin to VDR (C++)
  *
- * (C) 2001-2006 Stefan Huelswitt <s.huelswitt@gmx.de>
+ * (C) 2001-2007 Stefan Huelswitt <s.huelswitt@gmx.de>
  *
  * This code is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -389,7 +389,7 @@ bool cNetStream::SendRequest(void)
            "Accept: audio/mpeg\r\n"   //XXX audio/x-mpegurl, */*
            "Icy-MetaData: 1\r\n"
            "%s\r\n",
-           p,PLUGIN_NAME,PLUGIN_VERSION,h,a);
+           p,PLUGIN_NAME,PluginVersion,h,a);
   free(p); free(h);  
 
   if(++cc==1) asyncStatus.Set(tr("Connecting to stream server ..."));

@@ -728,7 +728,6 @@ eOSState cMenuMPlayBrowse::ProcessKey(eKeys Key)
 
 // --- cPluginMPlayer ----------------------------------------------------------
 
-static const char *VERSION        = PLUGIN_VERSION;
 static const char *DESCRIPTION    = trNOOP("Media replay via MPlayer");
 static const char *MAINMENUENTRY  = "MPlayer";
 
@@ -740,7 +739,7 @@ private:
 public:
   cPluginMPlayer(void);
   virtual ~cPluginMPlayer();
-  virtual const char *Version(void) { return VERSION; }
+  virtual const char *Version(void) { return PluginVersion; }
   virtual const char *Description(void) { return tr(DESCRIPTION); }
   virtual const char *CommandLineHelp(void);
   virtual bool ProcessArgs(int argc, char *argv[]);

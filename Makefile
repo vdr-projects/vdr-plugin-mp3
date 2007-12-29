@@ -65,20 +65,22 @@ PLUGIN2 = mplayer
 ### Allow user defined options to overwrite defaults:
 
 -include $(VDRDIR)/Make.config
+-include Make.config
 
-### The version number of this plugin (taken from the main source file):
+### The version number of this plugin:
 
-VERSION = $(shell grep 'define PLUGIN_VERSION' version.h | awk '{ print $$3 }' | sed -e 's/[";]//g')
+RELEASE := $(shell grep 'define PLUGIN_RELEASE' version.h | awk '{ print $$3 }' | sed -e 's/[";]//g')
+VERSION := $(shell if test -d .hg; then echo -n '$(RELEASE)-'; (hg identify 2>/dev/null || echo -n Unknown) | sed -e 's/ .*//'; else echo -n '$(RELEASE)'; fi)
 
 ### The version number of VDR (taken from VDR's "config.h"):
 
-VDRVERSION = $(shell sed -ne '/define VDRVERSION/ s/^.*"\(.*\)".*$$/\1/p' $(VDRDIR)/config.h)
-APIVERSION = $(shell sed -ne '/define APIVERSION/ s/^.*"\(.*\)".*$$/\1/p' $(VDRDIR)/config.h)
+VDRVERSION := $(shell sed -ne '/define VDRVERSION/ s/^.*"\(.*\)".*$$/\1/p' $(VDRDIR)/config.h)
+APIVERSION := $(shell sed -ne '/define APIVERSION/ s/^.*"\(.*\)".*$$/\1/p' $(VDRDIR)/config.h)
 ifeq ($(strip $(APIVERSION)),)
    APIVERSION = $(VDRVERSION)
 endif
-VDRVERSNUM = $(shell sed -ne '/define VDRVERSNUM/ s/^.[a-zA-Z ]*\([0-9]*\) .*$$/\1/p' $(VDRDIR)/config.h)
-APIVERSNUM = $(shell sed -ne '/define APIVERSNUM/ s/^.[a-zA-Z ]*\([0-9]*\) .*$$/\1/p' $(VDRDIR)/config.h)
+VDRVERSNUM := $(shell sed -ne '/define VDRVERSNUM/ s/^.[a-zA-Z ]*\([0-9]*\) .*$$/\1/p' $(VDRDIR)/config.h)
+APIVERSNUM := $(shell sed -ne '/define APIVERSNUM/ s/^.[a-zA-Z ]*\([0-9]*\) .*$$/\1/p' $(VDRDIR)/config.h)
 ifeq ($(strip $(APIVERSNUM)),)
    APIVERSNUM = $(VDRVERSNUM)
 endif
@@ -108,7 +110,7 @@ ifndef WITHOUT_MPLAYER
   endif
 endif
 
-COM_OBJS = i18n.o data.o menu.o
+COM_OBJS = i18n.o data.o menu.o version.o
 
 OBJS     = $(PLUGIN).o $(COM_OBJS)\
             data-mp3.o setup-mp3.o player-mp3.o stream.o network.o\
@@ -156,8 +158,9 @@ LOCALEDIR = $(VDRDIR)/locale
 
 MAKEDEP = g++ -MM -MG
 DEPFILE = .dependencies
-$(DEPFILE): Makefile
-	@$(MAKEDEP) $(DEFINES) $(INCLUDES) $(OBJS:%.o=%.c) $(OBJS2:%.o=%.c) > $@
+DEPFILES = $(subst version.c,,$(OBJS:%.o=%.c) $(OBJS2:%.o=%.c))
+$(DEPFILE): Makefile $(DEPFILES) $(wildcard *.h)
+	@$(MAKEDEP) $(DEFINES) $(INCLUDES) $(DEPFILES) > $@
 
 -include $(DEPFILE)
 
@@ -199,6 +202,13 @@ $(I18Nmsgs2): $(LOCALEDIR)/%/LC_MESSAGES/vdr-$(PLUGIN2).mo: $(PODIR)/%.mo
 
 i18n-$(PLUGIN2): $(I18Nmsgs2)
 
+version.c: FORCE
+	@echo >$@.new "/* this file will be overwritten without warning */"; \
+	 echo >>$@.new 'const char *PluginVersion =' '"'$(VERSION)'";'; \
+	 diff $@.new $@ >$@.diff 2>&1; \
+	 if test -s $@.diff; then mv -f $@.new $@; fi; \
+	 rm -f $@.new $@.diff;
+
 dist: clean
 	@-rm -rf $(TMPDIR)/$(ARCHIVE)
 	@mkdir $(TMPDIR)/$(ARCHIVE)
@@ -209,4 +219,7 @@ dist: clean
 
 clean:
 	@-rm -f $(OBJS) $(OBJS2) $(DEPFILE) libvdr-*.so $(PACKAGE).tar.gz core* *~
+	@-rm -f version.c
 	@-rm -f $(PODIR)/*.mo
+
+FORCE:

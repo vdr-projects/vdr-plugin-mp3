@@ -8,3 +8,4 @@ po/*.pot
 *.orig
 *.rej
 *.bak
+version.c

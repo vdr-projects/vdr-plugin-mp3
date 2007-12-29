@@ -1,7 +1,7 @@
 /*
  * MP3/MPlayer plugin to VDR (C++)
  *
- * (C) 2001-2005 Stefan Huelswitt <s.huelswitt@gmx.de>
+ * (C) 2001-2007 Stefan Huelswitt <s.huelswitt@gmx.de>
  *
  * This code is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -708,7 +708,7 @@ bool cCDDB::RemoteGet(cDiscID *id)
     if(code/100==2) {
       const char *host=getenv("HOSTNAME"); if(!host) host="unknown";
       const char *user=getenv("USER"); if(!user) user="nobody";
-      code=DoCddbCmd("cddb hello %s %s %s %s\n",user,host,PLUGIN_NAME,PLUGIN_VERSION);
+      code=DoCddbCmd("cddb hello %s %s %s %s\n",user,host,PLUGIN_NAME,PluginVersion);
       if(code/100==2) {
         code=DoCddbCmd("proto %d\n",CDDB_PROTO);
         if(code>0) {
