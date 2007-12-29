@@ -1,6 +1,9 @@
 VDR Plugin Revision History
 ---------------------------
 
+..2007: Version 0.10.2 (vdr 1.4.7 / 1.5.11)
+- Removed line number references from *.po files.
+
 27.08.2007: Version 0.10.1 (vdr 1.4.7 / 1.5.9)
 - Fixed segfault in MP3 infocache purge on plugin exit.
 - Added support for VDR 1.5.7+ gettext internationalization.

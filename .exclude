@@ -3,3 +3,4 @@
 libvdr-*.so
 *.mo
 *.pot
+.hg

@@ -177,11 +177,11 @@ libvdr-$(PLUGIN2).so: $(OBJS2)
 	$(CXX) $(CXXFLAGS) -shared $(OBJS2) $(LIBS2) -o $@
 	@cp $@ $(LIBDIR)/$@.$(APIVERSION)
 
-$(I18Npot): $(shell grep -rl '\(tr\|trNOOP\)(\".*\")' *.c $(SYSDIR))
-	xgettext -C -cTRANSLATORS --no-wrap -F -k -ktr -ktrNOOP --msgid-bugs-address='<s.huelswitt@gmx.de>' -o $@ $^
+$(I18Npot): $(shell grep -rl '\(tr\|trNOOP\)(\".*\")' *.c )
+	xgettext -C -cTRANSLATORS --no-wrap --no-location -k -ktr -ktrNOOP --msgid-bugs-address='<s.huelswitt@gmx.de>' -o $@ $^
 
 %.po: $(I18Npot)
-	msgmerge -U --no-wrap -F --backup=none -q $@ $<
+	msgmerge -U --no-wrap --no-location --backup=none -q $@ $<
 	@touch $@
 
 %.mo: %.po
@@ -209,4 +209,4 @@ dist: clean
 
 clean:
 	@-rm -f $(OBJS) $(OBJS2) $(DEPFILE) libvdr-*.so $(PACKAGE).tar.gz core* *~
-	@-rm -f $(PODIR)/*.mo $(PODIR)/*.pot
+	@-rm -f $(PODIR)/*.mo
