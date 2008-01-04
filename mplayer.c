@@ -77,6 +77,7 @@ const char *sourcesSub=0;
 cFileSources MPlaySources;
 
 static const char *plugin_name=0;
+const char *i18n_name=0;
 
 // --- cMenuSetupMPlayer --------------------------------------------------------
 
