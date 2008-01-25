@@ -45,7 +45,7 @@ msgid "Unmount"
 msgstr "Démonter"
 
 msgid "Eject"
-msgstr ""
+msgstr "Eject"
 
 msgid "Selected source is not mounted!"
 msgstr "Source sélectionnée non montée!"
@@ -150,16 +150,16 @@ msgid "Browser"
 msgstr "Navigateur"
 
 msgid "Setup.MP3$Keep selection menu"
-msgstr ""
+msgstr "Afficher le menu de selection"
 
 msgid "Setup.MP3$Title/Artist order"
-msgstr ""
+msgstr "Trier par Titre/Artiste"
 
 msgid "Normal"
-msgstr ""
+msgstr "Normal"
 
 msgid "Reversed"
-msgstr ""
+msgstr "Inversé"
 
 msgid "Hide mainmenu entry"
 msgstr "Cacher l entrée du menu"
@@ -324,7 +324,7 @@ msgid "Slave"
 msgstr "Esclave"
 
 msgid "Setup.MPlayer$OSD position"
-msgstr ""
+msgstr "Position OSD"
 
 msgid "global only"
 msgstr "Global seulement"
@@ -336,7 +336,7 @@ msgid "Setup.MPlayer$Resume mode"
 msgstr "Reprise"
 
 msgid "Setup.MPlayer$Slave command key"
-msgstr ""
+msgstr "Commande esclave"
 
 msgid "MPlayer Audio ID"
 msgstr "Mplayer piste audio"
@@ -351,7 +351,7 @@ msgid "MPlayer source"
 msgstr "Source MPlayer"
 
 msgid "Summary"
-msgstr ""
+msgstr "Résumé"
 
 msgid "Media replay via MPlayer"
 msgstr "Lecture par MPlayer"
