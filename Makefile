@@ -1,7 +1,7 @@
 #
 # MP3/MPlayer plugin to VDR
 #
-# (C) 2001-2007 Stefan Huelswitt <s.huelswitt@gmx.de>
+# (C) 2001-2008 Stefan Huelswitt <s.huelswitt@gmx.de>
 #
 # This code is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -69,8 +69,14 @@ PLUGIN2 = mplayer
 
 ### The version number of this plugin:
 
+HGARCHIVE = .hg_archival.txt
 RELEASE := $(shell grep 'define PLUGIN_RELEASE' version.h | awk '{ print $$3 }' | sed -e 's/[";]//g')
-VERSION := $(shell if test -d .hg; then echo -n '$(RELEASE)-'; (hg identify 2>/dev/null || echo -n Unknown) | sed -e 's/ .*//'; else echo -n '$(RELEASE)'; fi)
+RELSTR  := $(shell if test -d .hg; then \
+                     echo -n "-"; (hg identify 2>/dev/null || echo -n "Unknown") | sed -e 's/ .*//'; \
+                   elif test -r $(HGARCHIVE); then \
+                     echo -n "-"; grep "^node" $(HGARCHIVE) | awk '{ printf "%.12s",$$2 }'; \
+                   fi)
+VERSION := $(RELEASE)$(RELSTR)
 
 ### The version number of VDR (taken from VDR's "config.h"):
 
@@ -87,7 +93,7 @@ endif
 
 ### The name of the distribution archive:
 
-ARCHIVE = $(PLUGIN)-$(VERSION)
+ARCHIVE = $(PLUGIN)-$(RELEASE)
 PACKAGE = vdr-$(ARCHIVE)
 
 ### Includes and Defines (add further entries here):
@@ -153,16 +159,6 @@ ifeq ($(strip $(HASLOCALE)),)
   COM_OBJS += i18n.o
 endif
 
-# Dependencies:
-
-MAKEDEP = g++ -MM -MG
-DEPFILE = .dependencies
-DEPFILES = $(subst i18n.c,,$(subst version.c,,$(OBJS:%.o=%.c) $(OBJS2:%.o=%.c)))
-$(DEPFILE): Makefile $(DEPFILES) $(wildcard *.h)
-	@$(MAKEDEP) $(DEFINES) $(INCLUDES) $(DEPFILES) > $@
-
--include $(DEPFILE)
-
 ### Targets:
 
 ifndef WITHOUT_MP3
@@ -180,6 +176,18 @@ endif
 
 all: $(ALL)
 .PHONY: i18n-$(PLUGIN) i18n-$(PLUGIN2)
+
+# Dependencies:
+
+MAKEDEP = g++ -MM -MG
+DEPFILE = .dependencies
+DEPFILES = $(subst i18n.c,,$(subst version.c,,$(OBJS:%.o=%.c) $(OBJS2:%.o=%.c)))
+$(DEPFILE): Makefile $(DEPFILES) $(wildcard *.h)
+	@$(MAKEDEP) $(DEFINES) $(INCLUDES) $(DEPFILES) > $@
+
+-include $(DEPFILE)
+
+# Rules
 
 %.o: %.c
 	$(CXX) $(CXXFLAGS) -c $(DEFINES) $(INCLUDES) $<
