@@ -410,7 +410,8 @@ bool cCacheData::Save(FILE *f)
 
 bool cCacheData::Load(FILE *f)
 {
-  char buf[1024], *delimiters="=\n";
+  static const char delimiters[] = { "=\n" };
+  char buf[1024];
 
   cFileInfo::Clear();
   cSongInfo::Clear();
