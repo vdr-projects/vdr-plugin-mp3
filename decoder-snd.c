@@ -845,7 +845,7 @@ bool cSndInfo::DoScan(bool KeepOpen)
   Channels=file->sfi.channels;
   ChMode=Channels>1 ? 3:0;
   Total=Frames/SampleFreq;
-  Bitrate=file->Filesize*8/Total; //XXX SampleFreq*Channels*file->sfi.pcmbitwidth;
+  Bitrate=Total ? file->Filesize*8/Total : 0; //XXX SampleFreq*Channels*file->sfi.pcmbitwidth;
   DecoderID=DEC_SND;
 
   InfoDone();
