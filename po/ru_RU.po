@@ -2,18 +2,20 @@
 # Copyright (C) 2007 Stefan Huelswitt <s.huelswitt@gmx.de>
 # This file is distributed under the same license as the VDR package.
 # Vyacheslav Dikonov <sdiconov@mail.ru>
+# Alexander <Bikalexander@gmail.com>, 2008.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: VDR 1.5.9\n"
 "Report-Msgid-Bugs-To: <s.huelswitt@gmx.de>\n"
 "POT-Creation-Date: 2007-12-17 19:14+0100\n"
-"PO-Revision-Date: 2007-08-27 16:33+0200\n"
-"Last-Translator: Stefan Huelswitt <s.huelswitt@gmx.de>\n"
+"PO-Revision-Date: 2008-03-12 19:50+0100\n"
+"Last-Translator: Alexander <Bikalexander@gmail.com>\n"
 "Language-Team: <vdr@linuxtv.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=ISO-8859-5\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Generator: KBabel 1.11.4\n"
 
 msgid "unknown"
 msgstr "неизвестный"
@@ -43,7 +45,7 @@ msgid "Unmount"
 msgstr "Отключить"
 
 msgid "Eject"
-msgstr ""
+msgstr "Извлечь"
 
 msgid "Selected source is not mounted!"
 msgstr "Выбранный диск не подключен!"
@@ -103,7 +105,7 @@ msgid "Live"
 msgstr "телевидение"
 
 msgid "Images"
-msgstr ""
+msgstr "Изображения"
 
 msgid "Setup.MP3$Background mode"
 msgstr "Режим фона"
@@ -148,16 +150,16 @@ msgid "Browser"
 msgstr "каталоги"
 
 msgid "Setup.MP3$Keep selection menu"
-msgstr ""
+msgstr "Оставить меню открытым"
 
 msgid "Setup.MP3$Title/Artist order"
-msgstr ""
+msgstr "Последовательность названия/исполнителя"
 
 msgid "Normal"
-msgstr ""
+msgstr "Нормально"
 
 msgid "Reversed"
-msgstr ""
+msgstr "Реверсед"
 
 msgid "Hide mainmenu entry"
 msgstr "Скрыть команду в меню"
@@ -322,25 +324,25 @@ msgid "Slave"
 msgstr "расширенный"
 
 msgid "Setup.MPlayer$OSD position"
-msgstr ""
+msgstr "Позиция OSD"
 
 msgid "global only"
-msgstr ""
+msgstr "только глобально"
 
 msgid "local first"
-msgstr ""
+msgstr "сначало локально"
 
 msgid "Setup.MPlayer$Resume mode"
-msgstr ""
+msgstr "Режим возобновления"
 
 msgid "Setup.MPlayer$Slave command key"
-msgstr ""
+msgstr "Slave команда кнопки"
 
 msgid "MPlayer Audio ID"
-msgstr ""
+msgstr "MPlayer аудио ID"
 
 msgid "Audiostream ID"
-msgstr ""
+msgstr "ID звуковой дорожки"
 
 msgid "MPlayer browser"
 msgstr "Просмотр каталогов MPlayer"
@@ -349,7 +351,7 @@ msgid "MPlayer source"
 msgstr "Источник видео MPlayer"
 
 msgid "Summary"
-msgstr ""
+msgstr "Резюме"
 
 msgid "Media replay via MPlayer"
 msgstr "Проигрыватель видеофайлов"
