@@ -32,7 +32,7 @@ class cDecoder;
 class cSongInfo;
 class cImageConvert;
 
-extern const char *imagecache, *imageconv;
+extern const char *imagecache, *imageconv, *def_usr_img;
 extern const char *img_suff[], *excl_pl[], *excl_br[];
 
 // ----------------------------------------------------------------

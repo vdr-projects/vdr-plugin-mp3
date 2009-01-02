@@ -38,6 +38,7 @@
 
 const char *imagecache = "/var/cache/images/mp3";
 const char *imageconv  = "image_convert.sh";
+const char *def_usr_img = 0;
 
 // image suffixes to search
 const char *img_suff[] = { "jpg","png","gif",0 };
@@ -261,6 +262,9 @@ bool cSong::FindImage(void)
 
   // default image in source basedir
   if((image=CheckImage("background"))) return true;
+
+  // default user supplied image
+  if(def_usr_img && (image=strdup(def_usr_img))) return true;
 
   di(printf("image: no image for %s\n",obj->Path()))
   return false;

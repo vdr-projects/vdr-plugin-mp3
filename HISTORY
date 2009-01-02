@@ -4,11 +4,13 @@ VDR Plugin Revision History
 ..2007: Version 0.10.2 (vdr 1.4.7 / 1.5.11)
 - Fixed a segfault while direct song selection. Thanks to Halim Sahin for
   reporting.
+- Fixed possible division by zero in libsndfile decoder.
 - Fixed some gcc 4.x warnings.
-- Removed line number references from *.po files.
+- Added commandline option for a user defined default background image.
 - Backward compatible on-the-fly creation of the i18n.c file using Udo Richter's
   po2i18n package.
 - Added italian translations.
+- Updated french and russian translations.
 
 27.08.2007: Version 0.10.1 (vdr 1.4.7 / 1.5.9)
 - Fixed segfault in MP3 infocache purge on plugin exit.

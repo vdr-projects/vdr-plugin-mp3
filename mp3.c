@@ -1603,6 +1603,8 @@ const char *cPluginMp3::CommandLineHelp(void)
                      "                           (default: %s)\n"
                      "  -i CMD,   --iconv=CMD    use CMD to convert background images\n"
                      "                           (default: %s)\n"
+                     "  -I IMG,   --defimage=IMG use IMG as default background image\n"
+                     "                           (default: none)\n"
                      "  -c DIR,   --icache=DIR   cache converted images in DIR\n"
                      "                           (default: %s)\n"
                      "  -S SUB,   --sources=SUB  search sources config in SUB subdirectory\n"
@@ -1638,6 +1640,7 @@ bool cPluginMp3::ProcessArgs(int argc, char *argv[])
       { "cache",    required_argument, NULL, 'C' },
       { "icache",   required_argument, NULL, 'c' },
       { "iconv",    required_argument, NULL, 'i' },
+      { "defimage", required_argument, NULL, 'I' },
       { "sources",  required_argument, NULL, 'S' },
       { NULL }
     };
@@ -1650,6 +1653,7 @@ bool cPluginMp3::ProcessArgs(int argc, char *argv[])
       case 'm': mountscript=optarg; break;
       case 'n': netscript=optarg; break;
       case 'C': cachedir=optarg; break;
+      case 'I': def_usr_img=optarg; break;
       case 'S': sourcesSub=optarg; break;
       case 'B':
 #ifdef HAVE_SNDFILE
