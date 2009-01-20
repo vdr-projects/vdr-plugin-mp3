@@ -554,6 +554,11 @@ eOSState cMPlayerControl::ProcessKey(eKeys Key)
           case kOk: if(visible && !modeOnly) { Hide(); DoShowMode=true; }
                     else ShowTimed();
                     break;
+#if APIVERSNUM >= 10318
+          case kAudio:
+                    player->KeyCmd("switch_audio");
+                    break;
+#endif
           case k0:
           case k1:
           case k2:
