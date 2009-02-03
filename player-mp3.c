@@ -1408,14 +1408,21 @@ cOutputOss::cOutputOss(cMP3Player *Player)
 
 cOutputOss::~cOutputOss()
 {
-  close(fd);
+  if(fd>=0) close(fd);
 }
 
 void cOutputOss::Init(void)
 {
   if(fd<0) {
     fd=open(dspdevice,O_WRONLY|O_NONBLOCK);
-    if(fd>=0) poll.Add(fd,true);
+    if(fd>=0) {
+      if(fcntl(fd,F_SETFL,0)==0)
+        poll.Add(fd,true);
+      else {
+        esyslog("ERROR: Cannot make dsp device '%s' blocking: %s!",dspdevice,strerror(errno));
+        close(fd); fd=-1;
+        }
+      }
     else esyslog("ERROR: Cannot open dsp device '%s': %s!",dspdevice,strerror(errno));
     }
   cOutput::Init();
@@ -1484,9 +1491,12 @@ int cOutputOss::Output(const unsigned char *Data, int Len, bool SOF)
       n=FHS;
       Data+=n; Len-=n;
       }
-    int r=write(fd,Data,Len);
-    if(r<0 && !FATALERRNO) r=0;
-    if(r>=0) return n+r;
+    if(poll.Poll(0)) {
+      int r=write(fd,Data,Len);
+      if(r<0 && FATALERRNO) return -1;
+      if(r>0) n+=r;
+      }
+    return n;
     }
   return -1;
 }

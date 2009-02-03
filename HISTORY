@@ -9,6 +9,8 @@ VDR Plugin Revision History
 - Added commandline option for a user defined default background image.
 - Map audio-button to "switch_audio" slave command in MPlayer replay. Suggested
   by Martin Dauskardt.
+- Use blocking IO for OSS output for improved compatibility. Suggested by Martin
+  Dauskardt.
 - Backward compatible on-the-fly creation of the i18n.c file using Udo Richter's
   po2i18n package.
 - Added italian translations.
