@@ -1,7 +1,7 @@
 /*
  * MP3/MPlayer plugin to VDR (C++)
  *
- * (C) 2001-2007 Stefan Huelswitt <s.huelswitt@gmx.de>
+ * (C) 2001-2009 Stefan Huelswitt <s.huelswitt@gmx.de>
  *
  * This code is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -33,7 +33,6 @@ cMPlayerSetup::cMPlayerSetup(void)
   SlaveMode = 1;
   ResumeMode = 2;
   HideMainMenu = 0;
-  OsdPos = 0;
   memset(KeyCmd,0,sizeof(KeyCmd));
   strcpy(KeyCmd[1],"audio_delay +0.1");
   strcpy(KeyCmd[7],"audio_delay -0.1");

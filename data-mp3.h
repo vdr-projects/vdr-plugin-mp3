@@ -1,7 +1,7 @@
 /*
  * MP3/MPlayer plugin to VDR (C++)
  *
- * (C) 2001-2006 Stefan Huelswitt <s.huelswitt@gmx.de>
+ * (C) 2001-2009 Stefan Huelswitt <s.huelswitt@gmx.de>
  *
  * This code is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -59,11 +59,7 @@ public:
   cSong(cFileSource *Source, const char *Subdir, const char *Name);
   cSong(cSong *Song);
   ~cSong();
-#if APIVERSNUM >= 10315
   virtual int Compare(const cListObject &ListObject) const;
-#else
-  virtual bool operator<(const cListObject &ListObject);
-#endif
   bool Parse(char *s, const char *reldir) const;
   bool Save(FILE *f, const char *reldir) const;
   void Convert(void);
@@ -94,11 +90,7 @@ public:
   ~cPlayList();
   virtual bool Load(void);
   virtual bool Save(void);
-#if APIVERSNUM >= 10315
   virtual int Compare(const cListObject &ListObject) const;
-#else
-  virtual bool operator<(const cListObject &ListObject);
-#endif
   //
   bool Rename(const char *newName);
   bool Delete(void);

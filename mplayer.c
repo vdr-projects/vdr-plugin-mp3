@@ -1,7 +1,7 @@
 /*
  * MP3/MPlayer plugin to VDR (C++)
  *
- * (C) 2001-2007 Stefan Huelswitt <s.huelswitt@gmx.de>
+ * (C) 2001-2009 Stefan Huelswitt <s.huelswitt@gmx.de>
  *
  * This code is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -32,36 +32,9 @@
 #include <vdr/font.h>
 #include <vdr/osdbase.h>
 #include <vdr/menuitems.h>
-#ifdef HAVE_BEAUTYPATCH
-#include <vdr/fontsym.h>
-#endif
-#if APIVERSNUM >= 10307
 #include <vdr/skins.h>
-#endif
-#if APIVERSNUM >= 10332
 #include <vdr/remote.h>
-#endif
-
-#if APIVERSNUM > 10307
 #include <vdr/menu.h>
-#elif APIVERSNUM == 10307
-class cMenuText : public cOsdMenu {
-private:
-  char *text;
-public:
-  cMenuText(const char *Title, const char *Text, eDvbFont Font = fontOsd);
-  virtual ~cMenuText();
-  void SetText(const char *Text);
-  virtual void Display(void);
-  virtual eOSState ProcessKey(eKeys Key);
-  };
-#else
-class cMenuText : public cOsdMenu {
-public:
-  cMenuText(const char *Title, const char *Text, eDvbFont Font = fontOsd);
-  virtual eOSState ProcessKey(eKeys Key);
-  };
-#endif
 
 #include "setup.h"
 #include "setup-mplayer.h"
@@ -96,9 +69,6 @@ cMenuSetupMPlayer::cMenuSetupMPlayer(void)
   data=MPlayerSetup;
   SetSection(tr("MPlayer"));
   Add(new cMenuEditBoolItem(tr("Setup.MPlayer$Control mode"),  &data.SlaveMode, tr("Traditional"), tr("Slave")));
-#if APIVERSNUM < 10307
-  Add(new cMenuEditIntItem( tr("Setup.MPlayer$OSD position"),  &data.OsdPos, 0, 6));
-#endif
   res[0]=tr("disabled");
   res[1]=tr("global only");
   res[2]=tr("local first");
@@ -118,9 +88,6 @@ void cMenuSetupMPlayer::Store(void)
   SetupStore("ControlMode", MPlayerSetup.SlaveMode);
   SetupStore("HideMainMenu",MPlayerSetup.HideMainMenu);
   SetupStore("ResumeMode",  MPlayerSetup.ResumeMode);
-#if APIVERSNUM < 10307
-  SetupStore("OsdPos",      MPlayerSetup.OsdPos);
-#endif
   for(int i=0; i<10; i++) {
     char name[16];
     snprintf(name,sizeof(name),"KeyCmd%d",i);
@@ -135,9 +102,7 @@ private:
   static cFileObj *file;
   static bool rewind;
   cMPlayerPlayer *player;
-#if APIVERSNUM >= 10307
   cSkinDisplayReplay *display;
-#endif
   bool visible, modeOnly, haveBeauty;
   time_t timeoutShow;
   int lastCurrent, lastTotal;
@@ -148,7 +113,6 @@ private:
   //
   void Stop(void);
   void ShowTimed(int Seconds=0);
-  void DisplayAtBottom(const char *s);
   void ShowProgress(void);
   void ShowMode(void);
   void ShowTitle(void);
@@ -172,38 +136,14 @@ cMPlayerControl::cMPlayerControl(void)
 {
   visible=modeOnly=jumpactive=haveBeauty=false;
   lastReplayMsg=0;
-#if APIVERSNUM >= 10307
   display=0;
-#else
-#ifdef HAVE_BEAUTYPATCH
-#if APIVERSNUM >= 10300
-  const cFont *sym=cFont::GetFont(fontSym);
-  const cFont *osd=cFont::GetFont(fontOsd);
-  const cFont::tCharData *symD=sym->CharData(32);
-  const cFont::tCharData *osdD=osd->CharData(32);
-#else //APIVERSNUM >= 10300
-  cFont *sym=new cFont(fontSym);
-  cFont *osd=new cFont(fontOsd);
-  const cFont::tCharData *symD=sym->CharData(32);
-  const cFont::tCharData *osdD=osd->CharData(32);
-  delete sym;
-  delete osd;
-#endif //APIVERSNUM >= 10300
-  if(symD != osdD) haveBeauty=true;
-  d(printf("mplayer: beauty patch %sdetected\n",haveBeauty?"":"NOT "))
-#endif //HAVE_BEAUTYPATCH
-#endif //APIVERSNUM >= 10307
   ShowTitle();
 }
 
 cMPlayerControl::~cMPlayerControl()
 {
   Stop();
-#if APIVERSNUM >= 10338
   cStatus::MsgReplaying(this,0,0,false);
-#else
-  cStatus::MsgReplaying(this, NULL);
-#endif
   free(lastReplayMsg);
 }
 
@@ -231,11 +171,7 @@ void cMPlayerControl::ShowTimed(int Seconds)
 void cMPlayerControl::Hide(void)
 {
   if(visible) {
-#if APIVERSNUM >= 10307
     delete display; display=0;
-#else
-    Interface->Close();
-#endif
     visible=modeOnly=false;
 #if APIVERSNUM >= 10500
     SetNeedsFastResponse(false);
@@ -243,20 +179,6 @@ void cMPlayerControl::Hide(void)
     needsFastResponse=false;
 #endif
     }
-}
-
-void cMPlayerControl::DisplayAtBottom(const char *s)
-{
-#if APIVERSNUM < 10307
-  const int p=modeOnly ? 0 : 2;
-  if(s) {
-    const int d=max(Width()-cOsd::WidthInCells(s),0) / 2;
-    if(modeOnly) Interface->Fill(0, p, Interface->Width(), 1, clrTransparent);
-    Interface->Write(d, p, s);
-    }
-  else
-    Interface->Fill(12, p, Width() - 22, 1, clrBackground);
-#endif
 }
 
 void cMPlayerControl::ShowTitle(void)
@@ -272,27 +194,12 @@ void cMPlayerControl::ShowTitle(void)
     const char *name=rindex(path,'/');
     if(name) name++; else name=path;
     if(!lastReplayMsg || strcmp(lastReplayMsg,path)) {
-#if APIVERSNUM >= 10338
       cStatus::MsgReplaying(this,name,path,true);
-#else
-      cStatus::MsgReplaying(this,path);
-#endif
       free(lastReplayMsg);
       lastReplayMsg=strdup(path);
       }
     if(visible) {
-#if APIVERSNUM >= 10307
       if(display) display->SetTitle(name);
-#else
-      int n=strlen(name);
-      if(n>Width()) {
-        n=n-Width()+4; if(n<0) n=0;
-        char str[72];
-        snprintf(str,sizeof(str),"... %s",name+n);
-        Interface->Write(0,0,str);
-        }
-      else Interface->Write(0,0,name);
-#endif
       }
     }
   if(release) free((void *)path);
@@ -305,13 +212,7 @@ void cMPlayerControl::ShowProgress(void)
   if(GetIndex(Current,Total) && Total>0) {
     bool flush=false;
     if(!visible) {
-#if APIVERSNUM >= 10307
       display=Skins.Current()->DisplayReplay(false);
-#else
-      Interface->Open(Setup.OSDwidth,-MPlayerSetup.OsdPos-3);
-      Interface->Clear();
-      if(MPlayerSetup.OsdPos>0) Interface->Fill(0,3,Interface->Width(),MPlayerSetup.OsdPos,clrTransparent);
-#endif
       visible=true; modeOnly=false;
 #if APIVERSNUM >= 10500
       SetNeedsFastResponse(true);
@@ -323,7 +224,6 @@ void cMPlayerControl::ShowProgress(void)
       }
 
     if(abs(Current-lastCurrent)>12) {
-#if APIVERSNUM >= 10307
       if(Total>0) display->SetProgress(Current, Total);
       display->SetCurrent(IndexToHMSF(Current));
       display->SetTotal(IndexToHMSF(Total));
@@ -331,32 +231,15 @@ void cMPlayerControl::ShowProgress(void)
       int Speed;
       if(GetReplayMode(Play,Forward,Speed)) 
         display->SetMode(Play, Forward, Speed);
-#else
-      cProgressBar ProgressBar(Width() * cOsd::CellWidth(), cOsd::LineHeight(), Current, Total);
-      Interface->SetBitmap(0, cOsd::LineHeight(), ProgressBar);
-      Interface->Write(0,2,IndexToHMSF(Current));
-      Interface->Write(-7,2,IndexToHMSF(Total));
-#endif
       ShowTitle();
       flush=true;
       lastCurrent=Current; lastTotal=Total;
       }
     if(flush) 
-#if APIVERSNUM >= 10307
       Skins.Flush();
-#else
-      Interface->Flush();
-#endif
     ShowMode();
     }
 }
-
-#if APIVERSNUM < 10307
-#ifdef HAVE_BEAUTYPATCH
-int forwSym[] = { FSYM_FORW,FSYM_FORW1,FSYM_FORW2,FSYM_FORW3 };
-int backSym[] = { FSYM_BACK,FSYM_BACK1,FSYM_BACK2,FSYM_BACK3 };
-#endif
-#endif
 
 void cMPlayerControl::ShowMode(void)
 {
@@ -368,50 +251,13 @@ void cMPlayerControl::ShowMode(void)
 
        if(!visible) {
          if(NormalPlay) return;
-#if APIVERSNUM >= 10307
          display = Skins.Current()->DisplayReplay(true);
-#else
-         Interface->Open(0,-MPlayerSetup.OsdPos-1);
-#endif
          visible=modeOnly=true;
          }
 
        if(modeOnly && !timeoutShow && NormalPlay) timeoutShow=time(0)+SELECTHIDE_TIMEOUT;
 
-#if APIVERSNUM >= 10307
        display->SetMode(Play, Forward, Speed);
-#else
-       char buf[16];
-       eDvbFont OldFont;
-#ifdef HAVE_BEAUTYPATCH
-       if(haveBeauty) {
-         int i=0;
-         if(!(Width()&1)) buf[i++]=' ';
-         buf[i]=FSYM_EMPTY; if(Speed>=0 && !Forward) buf[i]=backSym[Speed];
-         i++;
-         buf[i++]=Play?(Speed==-1?FSYM_PLAY:FSYM_EMPTY):FSYM_PAUSE;
-         buf[i]=FSYM_EMPTY; if(Speed>=0 && Forward) buf[i]=forwSym[Speed];
-         i++;
-         if(!(Width()&1)) buf[i++]=' ';
-         buf[i]=0;
-         OldFont = Interface->SetFont(fontSym);
-         }
-       else {
-#endif //HAVE_BEAUTYPATCH
-         const char *Mode;
-         if (Speed == -1) Mode = Play    ? "  >  " : " ||  ";
-         else if (Play)   Mode = Forward ? " X>> " : " <<X ";
-         else             Mode = Forward ? " X|> " : " <|X ";
-         strn0cpy(buf, Mode, sizeof(buf));
-         char *p = strchr(buf, 'X');
-         if(p) *p = Speed > 0 ? '1' + Speed - 1 : ' ';
-         OldFont = Interface->SetFont(fontFix);
-#ifdef HAVE_BEAUTYPATCH
-         }
-#endif //HAVE_BEAUTYPATCH
-       DisplayAtBottom(buf);
-       Interface->SetFont(OldFont);
-#endif //APIVERSNUM >= 10307
        }
     }
 }
@@ -422,11 +268,7 @@ void cMPlayerControl::JumpDisplay(void)
   const char *j=trVDR("Jump: "), u=jumpmode?'%':'m';
   if(!jumpval) sprintf(buf,"%s- %c",  j,u);
   else         sprintf(buf,"%s%d- %c",j,jumpval,u);
-#if APIVERSNUM >= 10307
   display->SetJump(buf);
-#else
-  DisplayAtBottom(buf);
-#endif
 }
 
 void cMPlayerControl::JumpProcess(eKeys Key)
@@ -442,7 +284,7 @@ void cMPlayerControl::JumpProcess(eKeys Key)
       break;
     case kBlue:
       jumpmode=!jumpmode; jumpval=0;
-      DisplayAtBottom(0); JumpDisplay();
+      JumpDisplay();
       break;
     case kPlay:
     case kUp:
@@ -466,11 +308,7 @@ void cMPlayerControl::JumpProcess(eKeys Key)
   if(!jumpactive) {
     if(jumphide) Hide();
     else 
-#if APIVERSNUM >= 10307
       display->SetJump(0);
-#else
-      DisplayAtBottom(0);
-#endif
     }
 }
 
@@ -540,11 +378,9 @@ eOSState cMPlayerControl::ProcessKey(eKeys Key)
   //    case kYellow:  player->SkipNext(); break;
 
       case kBack:
-#if APIVERSNUM >= 10332
                      Hide();
                      cRemote::CallPlugin(plugin_name);
                      return osBack;
-#endif
       case kStop:
       case kBlue:    Hide(); Stop(); return osEnd;
 
@@ -554,11 +390,9 @@ eOSState cMPlayerControl::ProcessKey(eKeys Key)
           case kOk: if(visible && !modeOnly) { Hide(); DoShowMode=true; }
                     else ShowTimed();
                     break;
-#if APIVERSNUM >= 10318
           case kAudio:
                     player->KeyCmd("switch_audio");
                     break;
-#endif
           case k0:
           case k1:
           case k2:
@@ -739,9 +573,7 @@ static const char *MAINMENUENTRY  = "MPlayer";
 
 class cPluginMPlayer : public cPlugin {
 private:
-#if APIVERSNUM >= 10330
   bool ExternalPlay(const char *path, bool test);
-#endif
 public:
   cPluginMPlayer(void);
   virtual ~cPluginMPlayer();
@@ -749,22 +581,14 @@ public:
   virtual const char *Description(void) { return tr(DESCRIPTION); }
   virtual const char *CommandLineHelp(void);
   virtual bool ProcessArgs(int argc, char *argv[]);
-#if APIVERSNUM >= 10131
   virtual bool Initialize(void);
-#else
-  virtual bool Start(void);
-#endif
   virtual const char *MainMenuEntry(void);
   virtual cOsdMenu *MainMenuAction(void);
   virtual cMenuSetupPage *SetupMenu(void);
   virtual bool SetupParse(const char *Name, const char *Value);
-#if APIVERSNUM >= 10330
   virtual bool Service(const char *Id, void *Data);
-#if APIVERSNUM >= 10331
   virtual const char **SVDRPHelpPages(void);
   virtual cString SVDRPCommand(const char *Command, const char *Option, int &ReplyCode);
-#endif
-#endif
   };
 
 cPluginMPlayer::cPluginMPlayer(void)
@@ -824,13 +648,9 @@ bool cPluginMPlayer::ProcessArgs(int argc, char *argv[])
   return true;
 }
 
-#if APIVERSNUM >= 10131
 bool cPluginMPlayer::Initialize(void)
-#else
-bool cPluginMPlayer::Start(void)
-#endif
 {
-  if(!CheckVDRVersion(1,1,16,"mplayer")) return false;
+  if(!CheckVDRVersion(1,4,5,"mplayer")) return false;
   plugin_name="mplayer";
 #if APIVERSNUM < 10507
   i18n_name="mplayer";
@@ -870,14 +690,11 @@ bool cPluginMPlayer::SetupParse(const char *Name, const char *Value)
   if(      !strcasecmp(Name, "ControlMode"))  MPlayerSetup.SlaveMode    = atoi(Value);
   else if (!strcasecmp(Name, "HideMainMenu")) MPlayerSetup.HideMainMenu = atoi(Value);
   else if (!strcasecmp(Name, "ResumeMode"))   MPlayerSetup.ResumeMode   = atoi(Value);
-  else if (!strcasecmp(Name, "OsdPos"))       MPlayerSetup.OsdPos       = atoi(Value);
   else if (!strncasecmp(Name,"KeyCmd", 6) && strlen(Name)==7 && isdigit(Name[6]))
     strn0cpy(MPlayerSetup.KeyCmd[Name[6]-'0'],Value,sizeof(MPlayerSetup.KeyCmd[0]));
   else return false;
   return true;
 }
-
-#if APIVERSNUM >= 10330
 
 bool cPluginMPlayer::ExternalPlay(const char *path, bool test)
 {
@@ -930,8 +747,6 @@ bool cPluginMPlayer::Service(const char *Id, void *Data)
   return false;
 }
 
-#if APIVERSNUM >= 10331
-
 const char **cPluginMPlayer::SVDRPHelpPages(void)
 {
   static const char *HelpPages[] = {
@@ -962,8 +777,5 @@ cString cPluginMPlayer::SVDRPCommand(const char *Command, const char *Option, in
     }
   return NULL;
 }
-
-#endif // 1.3.31
-#endif // 1.3.30
 
 VDRPLUGINCREATOR(cPluginMPlayer); // Don't touch this!

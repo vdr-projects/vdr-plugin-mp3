@@ -1,7 +1,7 @@
 /*
  * MP3/MPlayer plugin to VDR (C++)
  *
- * (C) 2001-2005 Stefan Huelswitt <s.huelswitt@gmx.de>
+ * (C) 2001-2009 Stefan Huelswitt <s.huelswitt@gmx.de>
  *
  * This code is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -33,7 +33,6 @@ public:
   int SlaveMode;
   int ResumeMode;
   int HideMainMenu;
-  int OsdPos;
   char KeyCmd[10][MAX_KEYCMD];
 public:
   cMPlayerSetup(void);

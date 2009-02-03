@@ -1,7 +1,7 @@
 /*
  * MP3/MPlayer plugin to VDR (C++)
  *
- * (C) 2001-2007 Stefan Huelswitt <s.huelswitt@gmx.de>
+ * (C) 2001-2009 Stefan Huelswitt <s.huelswitt@gmx.de>
  *
  * This code is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -39,32 +39,17 @@
 
 void Status(const char *text)
 {
-#if APIVERSNUM >= 10307
   Skins.Message(mtStatus,text);
-#else
-  if(text) {
-    Interface->Status(text);
-    Interface->Flush();
-    }
-#endif
 }
 
 void Error(const char *text)
 {
-#if APIVERSNUM >= 10307
   Skins.Message(mtError,text);
-#else
-  Interface->Error(text);
-#endif
 }
 
 void Info(const char *text)
 {
-#if APIVERSNUM >= 10307
   Skins.Message(mtInfo,text);
-#else
-  Interface->Info(text);
-#endif
 }
 
 // --- cMenuBrowseItem ---------------------------------------------------------
@@ -390,13 +375,8 @@ cProgressBar::cProgressBar(int Width, int Height, int Current, int Total)
 {
   if(Total > 0) {
     int p = Current * Width / Total;;
-#if APIVERSNUM >= 10307
     DrawRectangle(0, 0, p, Height - 1, clrGreen);
     DrawRectangle(p + 1, 0, Width - 1, Height - 1, clrWhite);
-#else
-    Fill(0, 0, p, Height - 1, clrGreen);
-    Fill(p + 1, 0, Width - 1, Height - 1, clrWhite);
-#endif
     }
 }
 

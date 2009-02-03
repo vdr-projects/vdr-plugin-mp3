@@ -1,7 +1,7 @@
 /*
  * MP3/MPlayer plugin to VDR (C++)
  *
- * (C) 2001-2007 Stefan Huelswitt <s.huelswitt@gmx.de>
+ * (C) 2001-2009 Stefan Huelswitt <s.huelswitt@gmx.de>
  *
  * This code is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -80,14 +80,9 @@ void cMPlayerStatus::SetVolume(int Volume, bool Absolute)
   Lock();
   if(Absolute && Volume==0) mute=true;
   else {
-#if APIVERSNUM>=10401
-#if APIVERSNUM==10401
-#warning Caution! This code does not work with VDR 1.4.1 and 1.4.1-1. You can ignore this warning if you are using VDR 1.4.1-2 or later.
-#endif
     if(!Absolute)
       volume+=Volume;
     else
-#endif
       volume=Volume;
     if(volume>0) mute=false;
     }

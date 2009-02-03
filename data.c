@@ -1,7 +1,7 @@
 /*
  * MP3/MPlayer plugin to VDR (C++)
  *
- * (C) 2001-2006 Stefan Huelswitt <s.huelswitt@gmx.de>
+ * (C) 2001-2009 Stefan Huelswitt <s.huelswitt@gmx.de>
  *
  * This code is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -185,7 +185,6 @@ cFileObj::~cFileObj()
   free(fpath);
 }
 
-#if APIVERSNUM >= 10315
 int cFileObj::Compare(const cListObject &ListObject) const
 {
   cFileObj *obj=(cFileObj *)&ListObject;
@@ -199,21 +198,6 @@ int cFileObj::Compare(const cListObject &ListObject) const
     }
   return strcasecmp(path,obj->path);
 }
-#else
-bool cFileObj::operator<(const cListObject &ListObject)
-{
-  cFileObj *obj=(cFileObj *)&ListObject;
-  if(type==otParent) return obj->type==otParent ? false:true;
-  if(obj->type==otParent) return false;
-  if(type==otBase) return false;
-  if(obj->type==otBase) return true;
-  if(type!=obj->type) {
-    if(type==otFile) return false;
-    return true;
-    }
-  return strcasecmp(path,obj->path)<0;
-}
-#endif
 
 void cFileObj::SplitAndSet(const char *Path)
 {

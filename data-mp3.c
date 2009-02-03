@@ -1,7 +1,7 @@
 /*
  * MP3/MPlayer plugin to VDR (C++)
  *
- * (C) 2001-2006 Stefan Huelswitt <s.huelswitt@gmx.de>
+ * (C) 2001-2009 Stefan Huelswitt <s.huelswitt@gmx.de>
  *
  * This code is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -141,18 +141,10 @@ void cSong::Init(void)
   obj->Source()->Block();
 }
 
-#if APIVERSNUM >= 10315
 int cSong::Compare(const cListObject &ListObject) const
-#else
-bool cSong::operator<(const cListObject &ListObject)
-#endif
 {
   cSong *song=(cSong *)&ListObject;
-#if APIVERSNUM >= 10315
   return strcasecmp(obj->Path(),song->obj->Path());
-#else
-  return strcasecmp(obj->Path(),song->obj->Path())<0;
-#endif
 }
 
 cSongInfo *cSong::Info(bool get)
@@ -405,18 +397,10 @@ void cPlayList::Set(void)
     }
 }
 
-#if APIVERSNUM >= 10315
 int cPlayList::Compare(const cListObject &ListObject) const
-#else
-bool cPlayList::operator<(const cListObject &ListObject)
-#endif
 {
   cPlayList *list=(cPlayList *)&ListObject;
-#if APIVERSNUM >= 10315
   return strcasecmp(obj->Name(),list->obj->Name());
-#else
-  return strcasecmp(obj->Name(),list->obj->Name())<0;
-#endif
 }
 
 bool cPlayList::Load(void)

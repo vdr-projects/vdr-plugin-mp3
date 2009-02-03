@@ -1,7 +1,7 @@
 /*
  * MP3/MPlayer plugin to VDR (C++)
  *
- * (C) 2001-2006 Stefan Huelswitt <s.huelswitt@gmx.de>
+ * (C) 2001-2009 Stefan Huelswitt <s.huelswitt@gmx.de>
  *
  * This code is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -47,10 +47,6 @@
 
 const char *netscript=0;
 
-#if APIVERSNUM == 10131
-#error Using this plugin with vdr 1.1.31 is not recommended (may cause high cpu load during streaming)
-#endif
-
 // -----------------------------------------------------------------------------
 
 int RunCommand(const char *cmd, const char *State, const char *Name=0)
@@ -59,11 +55,7 @@ int RunCommand(const char *cmd, const char *State, const char *Name=0)
   if(cmd) {
     char *tmp=0;
     if(Name)
-#if APIVERSNUM < 10318
-      asprintf(&tmp,"%s %s \"%s\"",cmd,State,strescape(Name,"\"$"));
-#else
       asprintf(&tmp,"%s %s \"%s\"",cmd,State,*strescape(Name,"\"$"));
-#endif
     else asprintf(&tmp,"%s %s",cmd,State);
 
     d(printf("run: executing '%s'\n",tmp))
@@ -206,9 +198,7 @@ cNet::cNet(int size, int ConTimeoutMs, int RwTimeoutMs)
   connected=netup=false;
   rwTimeout =RwTimeoutMs  ? RwTimeoutMs :RW_TIMEOUT;
   conTimeout=ConTimeoutMs ? ConTimeoutMs:CON_TIMEOUT;
-#if APIVERSNUM >= 10132
   SetTimeouts(50,50);
-#endif
 }
 
 cNet::~cNet()

@@ -130,10 +130,6 @@ OBJS2    = $(PLUGIN2).o $(COM_OBJS)\
             setup-mplayer.o player-mplayer.o
 LIBS2    = 
 
-ifeq ($(shell test -f $(VDRDIR)/fontsym.h ; echo $$?),0)
-  DEFINES += -DHAVE_BEAUTYPATCH
-endif  
-
 ifdef DBG
   CXXFLAGS += -g
 endif

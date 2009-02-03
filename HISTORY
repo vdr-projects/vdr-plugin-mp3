@@ -13,6 +13,7 @@ VDR Plugin Revision History
   Dauskardt.
 - Backward compatible on-the-fly creation of the i18n.c file using Udo Richter's
   po2i18n package.
+- Removed compatibility with VDR versions < 1.4.5.
 - Added italian translations.
 - Updated french and russian translations.
 

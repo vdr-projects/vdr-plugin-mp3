@@ -1,7 +1,7 @@
 /*
  * MP3/MPlayer plugin to VDR (C++)
  *
- * (C) 2001-2007 Stefan Huelswitt <s.huelswitt@gmx.de>
+ * (C) 2001-2009 Stefan Huelswitt <s.huelswitt@gmx.de>
  *
  * This code is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -1227,11 +1227,7 @@ cOutputDvb::cOutputDvb(cMP3Player *Player)
 {
   only48khz=MP3Setup.Only48kHz;
   outSr=0;
-#if APIVERSNUM == 10318
-  cDevice::PrimaryDevice()->SetCurrentAudioTrack(ttDolbyFirst);
-#elif APIVERSNUM >= 10319
   cDevice::PrimaryDevice()->SetCurrentAudioTrack(ttAudio);
-#endif
   d(printf("mp3-dvb: using DVB output\n"))
 }
 
@@ -1330,11 +1326,7 @@ int cOutputDvb::Output(const unsigned char *Data, int Len, bool SOF)
         int pc=sizeof(testAudio);
         int r;
         do {
-#if APIVERSNUM < 10318
-          r=player->PlayVideo(p,pc);
-#else
           r=player->PlayPes(p,pc);
-#endif
           if(r>0) { p+=r; pc-=r; }
           if(r==0) Poll();
           } while(r>=0 && pc>0);
@@ -1346,11 +1338,7 @@ int cOutputDvb::Output(const unsigned char *Data, int Len, bool SOF)
     n=FHS;
     Data+=n; Len-=n;
     }
-#if APIVERSNUM < 10318
-  int r=player->PlayVideo(Data,Len);
-#else
   int r=player->PlayPes(Data,Len);
-#endif
   return (r>=0 ? r+n : -1);
 }
 

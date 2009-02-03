@@ -1,7 +1,7 @@
 /*
  * MP3/MPlayer plugin to VDR (C++)
  *
- * (C) 2001-2006 Stefan Huelswitt <s.huelswitt@gmx.de>
+ * (C) 2001-2009 Stefan Huelswitt <s.huelswitt@gmx.de>
  *
  * This code is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -23,11 +23,7 @@
 #define ___MENU_H
 
 #include "common.h"
-#if APIVERSNUM >= 10307
 #include <vdr/osdbase.h>
-#else
-#include <vdr/osd.h>
-#endif
 
 // ----------------------------------------------------------------
 

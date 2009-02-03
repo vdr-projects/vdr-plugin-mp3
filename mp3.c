@@ -1,7 +1,7 @@
 /*
  * MP3/MPlayer plugin to VDR (C++)
  *
- * (C) 2001-2007 Stefan Huelswitt <s.huelswitt@gmx.de>
+ * (C) 2001-2009 Stefan Huelswitt <s.huelswitt@gmx.de>
  *
  * This code is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -29,10 +29,8 @@
 #include <vdr/menuitems.h>
 #include <vdr/status.h>
 #include <vdr/plugin.h>
-#if APIVERSNUM >= 10307
 #include <vdr/interface.h>
 #include <vdr/skins.h>
-#endif
 
 #include "setup.h"
 #include "setup-mp3.h"
@@ -88,11 +86,9 @@ cMenuSetupMP3::cMenuSetupMP3(void)
   Add(new cMenuEditStraItem(tr("Setup.MP3$Audio output mode"),     &amode,numModes,aout));
   Add(new cMenuEditBoolItem(tr("Setup.MP3$Audio mode"),            &data.AudioMode, tr("Round"), tr("Dither")));
   Add(new cMenuEditBoolItem(tr("Setup.MP3$Use 48kHz mode only"),   &data.Only48kHz));
-#if APIVERSNUM >= 10307
   disp[0]=tr("classic");
   disp[1]=tr("via skin");
   Add(new cMenuEditStraItem(tr("Setup.MP3$Replay display"),        &data.ReplayDisplay, 2, disp));
-#endif
   Add(new cMenuEditIntItem( tr("Setup.MP3$Display mode"),          &data.DisplayMode, 1, 3));
   bgr[0]=tr("Black");
   bgr[1]=tr("Live");
@@ -147,9 +143,7 @@ void cMenuSetupMP3::Store(void)
   SetupStore("CddbHost",         MP3Setup.CddbHost       );
   SetupStore("CddbPort",         MP3Setup.CddbPort       );
   SetupStore("AbortAtEOL",       MP3Setup.AbortAtEOL     );
-#if APIVERSNUM >= 10307
   SetupStore("ReplayDisplay",    MP3Setup.ReplayDisplay  );
-#endif
   SetupStore("HideMainMenu",     MP3Setup.HideMainMenu   );
   SetupStore("KeepSelect",       MP3Setup.KeepSelect     );
   SetupStore("TitleArtistOrder", MP3Setup.TitleArtistOrder);
@@ -208,25 +202,13 @@ static const char *TitleArtist(const char *title, const char *artist)
 
 // --- cMP3Control --------------------------------------------------------
 
-#if APIVERSNUM >= 10307
-#define clrBackground clrGray50
-#define eDvbColor int
 #define MAXROWS 120
-#define INLINE
-#else
-#define MAXROWS MAXOSDHEIGHT
-#define INLINE inline
-#endif
 
 class cMP3Control : public cControl {
 private:
-#if APIVERSNUM >= 10307
   cOsd *osd;
   const cFont *font;
   cSkinDisplayReplay *disp;
-#else
-  bool statusInterfaceOpen;
-#endif
   int bw, bh, bwc, fw, fh;
   //
   cMP3Player *player;
@@ -254,8 +236,8 @@ private:
   void JumpProcess(eKeys Key);
   void Jump(void);
   void Stop(void);
-  INLINE void Write(int x, int y, int w, const char *text, eDvbColor fg=clrWhite, eDvbColor bg=clrBackground);
-  INLINE void Fill(int x, int y, int w, int h, eDvbColor fg);
+  void Write(int x, int y, int w, const char *text, int fg=clrWhite, int bg=clrGray50);
+  void Fill(int x, int y, int w, int h, int fg);
   inline void Flush(void);
 public:
   cMP3Control(void);
@@ -275,17 +257,9 @@ cMP3Control::cMP3Control(void)
   lastkeytime=number=0;
   lastMode=0;
   framesPerSecond=SecondsToFrames(1);
-#if APIVERSNUM >= 10307
   osd=0; disp=0;
   font=cFont::GetFont(fontOsd);
-#else
-  statusInterfaceOpen=false;
-#endif
-#if APIVERSNUM >= 10338
   cStatus::MsgReplaying(this,"MP3",0,true);
-#else
-  cStatus::MsgReplaying(this,"MP3");
-#endif
 }
 
 cMP3Control::~cMP3Control()
@@ -297,11 +271,7 @@ cMP3Control::~cMP3Control()
 
 void cMP3Control::Stop(void)
 {
-#if APIVERSNUM >= 10338
   cStatus::MsgReplaying(this,0,0,false);
-#else
-  cStatus::MsgReplaying(this,0);
-#endif
   delete player; player=0;
   mgr->Halt();
   mgr->Flush(); //XXX remove later
@@ -340,12 +310,8 @@ void cMP3Control::Hide(void)
   HideStatus();
   timeoutShow=0;
   if(visible) {
-#if APIVERSNUM >= 10307
     delete osd; osd=0;
     delete disp; disp=0;
-#else
-    Interface->Close();
-#endif
     visible=bigwin=false;
 #if APIVERSNUM >= 10500
     SetNeedsFastResponse(false);
@@ -360,7 +326,6 @@ void cMP3Control::ShowStatus(bool force)
   if((asyncStatus.Changed() || (force && !statusActive)) && !jumpactive) {
     const char *text=asyncStatus.Begin();
     if(text) {
-#if APIVERSNUM >= 10307
       if(MP3Setup.ReplayDisplay || !osd) {
         if(statusActive) Skins.Message(mtStatus,0);
         Skins.Message(mtStatus,text);
@@ -370,14 +335,6 @@ void cMP3Control::ShowStatus(bool force)
         osd->DrawText(0,bh-2*fh,text,clrBlack,clrCyan,font,bw,fh,taCenter);
         osd->Flush();
         }
-#else
-      if(!Interface->IsOpen()) {
-        Interface->Open(0,-1);
-        statusInterfaceOpen=true;
-        }
-      Interface->Status(text);
-      Interface->Flush();
-#endif
       statusActive=true;
       }
     else
@@ -389,23 +346,12 @@ void cMP3Control::ShowStatus(bool force)
 void cMP3Control::HideStatus(void)
 {
   if(statusActive) {
-#if APIVERSNUM >= 10307
     if(MP3Setup.ReplayDisplay || !osd)
       Skins.Message(mtStatus,0);
     else {
       osd->RestoreRegion();
       osd->Flush();
       }
-#else
-    if(statusInterfaceOpen) {
-      Interface->Close();
-      statusInterfaceOpen=false;
-      }
-    else {
-      Interface->Status(0);
-      Interface->Flush();
-      }
-#endif
     }
   statusActive=false;
 }
@@ -413,45 +359,28 @@ void cMP3Control::HideStatus(void)
 #define CTAB    11 // some tabbing values for the progress display
 #define CTAB2   5
 
-void cMP3Control::Write(int x, int y, int w, const char *text, eDvbColor fg, eDvbColor bg)
+void cMP3Control::Write(int x, int y, int w, const char *text, int fg, int bg)
 {
-#if APIVERSNUM >= 10307
   if(osd) {
-    //d(printf("write x=%d y=%d w=%d ->",x,y,w))
     x*=fw; if(x<0) x+=bw;
     y*=fh; if(y<0) y+=bh;
     osd->DrawText(x,y,text,fg,bg,font,w*fw);
-    //d(printf(" x=%d y=%d w=%d\n",x,y,w*fw))
     }
-#else
-  if(w>0) Fill(x,y,w,1,bg);
-  Interface->Write(x,y,text,fg,bg);
-#endif
 }
 
-void cMP3Control::Fill(int x, int y, int w, int h, eDvbColor fg)
+void cMP3Control::Fill(int x, int y, int w, int h, int fg)
 {
-#if APIVERSNUM >= 10307
   if(osd) {
-    //d(printf("fill x=%d y=%d w=%d h=%d ->",x,y,w,h))
     x*=fw; if(x<0) x+=bw;
     y*=fh; if(y<0) y+=bh;
     osd->DrawRectangle(x,y,x+w*fw-1,y+h*fh-1,fg);
-    //d(printf(" x=%d y=%d x2=%d y2=%d\n",x,y,x+h*fh-1,y+w*fw-1))
     }
-#else
-  Interface->Fill(x,y,w,h,fg);
-#endif
 }
 
 void cMP3Control::Flush(void)
 {
-#if APIVERSNUM >= 10307
   if(MP3Setup.ReplayDisplay) Skins.Flush();
   else if(osd) osd->Flush();
-#else
-  Interface->Flush();
-#endif
 }
 
 void cMP3Control::ShowProgress(bool open, bool bigWin)
@@ -461,7 +390,6 @@ void cMP3Control::ShowProgress(bool open, bool bigWin)
   if(player->GetIndex(index,total) && total>=0) {
     if(!visible && open) {
       HideStatus();
-#if APIVERSNUM >= 10307
       if(MP3Setup.ReplayDisplay) {
         disp=Skins.Current()->DisplayReplay(false);
         if(!disp) return;
@@ -500,15 +428,6 @@ void cMP3Control::ShowProgress(bool open, bool bigWin)
         osd->DrawRectangle(0,0,bw-1,bh-1,clrGray50);
         osd->Flush();
         }
-#else
-      fw=cOsd::CellWidth();
-      fh=cOsd::LineHeight();
-      bh=bigWin ? Setup.OSDheight : -2;
-      bw=bwc=Setup.OSDwidth;
-      rows=Setup.OSDheight-3;
-      Interface->Open(bw,bh);
-      Interface->Clear();
-#endif
       ShowStatus(true);
       bigwin=bigWin;
       visible=true;
@@ -531,18 +450,13 @@ void cMP3Control::ShowProgress(bool open, bool bigWin)
       if(changed || mode->Loop!=lastMode->Loop || mode->Shuffle!=lastMode->Shuffle) {
         snprintf(buf,sizeof(buf),"[%c%c] (%d/%d) %s",
                   mode->Loop?'L':'.',mode->Shuffle?'S':'.',mode->Num,mode->MaxNum,TitleArtist(mode->Title,mode->Artist));
-#if APIVERSNUM >= 10338
         cStatus::MsgReplaying(this,buf,mode->Filename[0]?mode->Filename:0,true);
-#else
-        cStatus::MsgReplaying(this,buf);
-#endif
         }
       }
 
     if(visible) { // refresh the OSD progress display
       bool flush=false;
 
-#if APIVERSNUM >= 10307
       if(MP3Setup.ReplayDisplay) {
         if(!statusActive) {
           if(total>0) disp->SetProgress(index,total);
@@ -556,7 +470,6 @@ void cMP3Control::ShowProgress(bool open, bool bigWin)
           }
         }
       else {
-#endif
         if(!selecting && changed && !statusActive) {
           snprintf(buf,sizeof(buf),"(%d/%d)",mode->Num,mode->MaxNum);
           Write(0,-2,CTAB,buf);
@@ -565,33 +478,26 @@ void cMP3Control::ShowProgress(bool open, bool bigWin)
 
         if(!lastMode || mode->Loop!=lastMode->Loop) {
           if(mode->Loop) Write(-4,-1,0,"L",clrBlack,clrYellow);
-          else Fill(-4,-1,2,1,clrBackground);
+          else Fill(-4,-1,2,1,clrGray50);
           flush=true;
           }
         if(!lastMode || mode->Shuffle!=lastMode->Shuffle) {
           if(mode->Shuffle) Write(-2,-1,0,"S",clrWhite,clrRed);
-          else Fill(-2,-1,2,1,clrBackground);
+          else Fill(-2,-1,2,1,clrGray50);
           flush=true;
           }
 
         index/=framesPerSecond; total/=framesPerSecond;
         if(index!=lastIndex || total!=lastTotal) {
           if(total>0) {
-#if APIVERSNUM >= 10307
             cProgressBar ProgressBar(bw-(CTAB+CTAB2)*fw,fh,index,total);
             osd->DrawBitmap(CTAB*fw,bh-fh,ProgressBar);
-#else
-            cProgressBar ProgressBar((bw-CTAB-CTAB2)*fw,fh,index,total);
-            Interface->SetBitmap(CTAB*fw,(abs(bh)-1)*fh,ProgressBar);
-#endif
             }
           snprintf(buf,sizeof(buf),total?"%02d:%02d/%02d:%02d":"%02d:%02d",index/60,index%60,total/60,total%60);
           Write(0,-1,11,buf);
           flush=true;
           }
-#if APIVERSNUM >= 10307
         }
-#endif
 
       if(!jumpactive) {
         bool doflip=false;
@@ -632,7 +538,6 @@ void cMP3Control::ShowProgress(bool open, bool bigWin)
 	      break;
 	    }
           if(buf[0]) {
-#if APIVERSNUM >= 10307
             if(MP3Setup.ReplayDisplay) {
               char buf2[256];
               snprintf(buf2,sizeof(buf2),"[%c%c] (%d/%d) %s",
@@ -641,15 +546,12 @@ void cMP3Control::ShowProgress(bool open, bool bigWin)
               flush=true;
               }
             else {
-#endif
               if(!statusActive) {
                 DisplayInfo(buf);
                 flush=true;
                 }
               else { d(printf("mp3-ctrl: display info skip due to status active\n")) }
-#if APIVERSNUM >= 10307
               }
-#endif
             }
           }
         }
@@ -665,7 +567,7 @@ void cMP3Control::ShowProgress(bool open, bool bigWin)
             cMP3PlayInfo pi;
             mgr->Info(num,&pi); if(!pi.Title[0]) break;
             snprintf(buf,sizeof(buf),"%d.\t%s",num,TitleArtist(pi.Title,pi.Artist));
-            eDvbColor fg=clrWhite, bg=clrBackground;
+            int fg=clrWhite, bg=clrGray50;
             int hash=MakeHash(buf);
             if(num==mode->Num) { fg=clrBlack; bg=clrCyan; hash=(hash^77) + 23; }
             if(all || hash!=hashlist[i]) {
@@ -696,7 +598,7 @@ void cMP3Control::ShowProgress(bool open, bool bigWin)
 void cMP3Control::DisplayInfo(const char *s)
 {
   if(s) Write(CTAB,-2,bwc-CTAB,s);
-  else Fill(CTAB,-2,bwc-CTAB,1,clrBackground);
+  else Fill(CTAB,-2,bwc-CTAB,1,clrGray50);
 }
 
 void cMP3Control::JumpDisplay(void)
@@ -705,16 +607,12 @@ void cMP3Control::JumpDisplay(void)
   const char *j=trVDR("Jump: "), u=jumpsecs?'s':'m';
   if(!jumpmm) sprintf(buf,"%s- %c",  j,u);
   else        sprintf(buf,"%s%d- %c",j,jumpmm,u);
-#if APIVERSNUM >= 10307
   if(MP3Setup.ReplayDisplay) {
     disp->SetJump(buf);
     }
   else {
-#endif
     DisplayInfo(buf);
-#if APIVERSNUM >= 10307
     }
-#endif
 }
 
 void cMP3Control::JumpProcess(eKeys Key)
@@ -746,9 +644,7 @@ void cMP3Control::JumpProcess(eKeys Key)
 
   if(!jumpactive) {
     if(jumphide) Hide();
-#if APIVERSNUM >= 10307
     else if(MP3Setup.ReplayDisplay) disp->SetJump(0);
-#endif
     }
 }
 
@@ -769,29 +665,21 @@ eOSState cMP3Control::ProcessKey(eKeys Key)
 
   if(timeoutShow && time(0)>timeoutShow) Hide();
   ShowProgress();
-#if APIVERSNUM >= 10307
   ShowStatus(Key==kNone && !Skins.IsOpen());
-#else
-  ShowStatus(Key==kNone && !Interface->IsOpen());
-#endif
 
   if(jumpactive && Key!=kNone) { JumpProcess(Key); return osContinue; }
 
   switch(Key) {
     case kUp:
     case kUp|k_Repeat:
-#if APIVERSNUM >= 10347
     case kNext:
     case kNext|k_Repeat:    
-#endif
       mgr->Next(); player->Play();
       break;
     case kDown:
     case kDown|k_Repeat:
-#if APIVERSNUM >= 10347
     case kPrev:
     case kPrev|k_Repeat:
-#endif
       if(!player->PrevCheck()) mgr->Prev();
       player->Play();
       break;
@@ -848,12 +736,8 @@ eOSState cMP3Control::ProcessKey(eKeys Key)
       return osEnd;
     case kBack:
       Hide();
-#if APIVERSNUM >= 10332
       cRemote::CallPlugin(plugin_name);
       return osBack;
-#else
-      return osEnd;
-#endif
 
     case k0 ... k9:
       number=number*10+Key-k0;
@@ -862,18 +746,14 @@ eOSState cMP3Control::ProcessKey(eKeys Key)
         else if(timeoutShow>0) timeoutShow=time(0)+SELECTHIDE_TIMEOUT;
         selecting=true; lastkeytime=time_ms();
         char buf[32];
-#if APIVERSNUM >= 10307
         if(MP3Setup.ReplayDisplay) {
           snprintf(buf,sizeof(buf),"%s%d-/%d",trVDR("Jump: "),number,lastMode->MaxNum);
           disp->SetJump(buf);
           }
         else {
-#endif
           snprintf(buf,sizeof(buf),"(%d-/%d)",number,lastMode->MaxNum);
           Write(0,-2,CTAB,buf);
-#if APIVERSNUM >= 10307
           }
-#endif
         Flush();
         break;
         }
@@ -884,9 +764,7 @@ eOSState cMP3Control::ProcessKey(eKeys Key)
         if(number>0) { mgr->Goto(number); player->Play();  }
         if(lastMode) lastMode->Hash=-1;
         number=0; selecting=false;
-#if APIVERSNUM >= 10307
         if(MP3Setup.ReplayDisplay && disp) disp->SetJump(0);
-#endif
         }
       break;
     case kOk:
@@ -970,11 +848,7 @@ cOsdItem *cMenuID3Info::Item(const char *name, const char *text)
   char *buf=0;
   asprintf(&buf,"%s:\t%s",name,text?text:"");
   cOsdItem *item = new cOsdItem(buf,osBack);
-#if APIVERSNUM >= 10307
   item->SetSelectable(false);
-#else
-  item->SetColor(clrWhite, clrBackground);
-#endif
   free(buf);
   Add(item); return item;
 }
@@ -1249,11 +1123,7 @@ cPlaylistRename::cPlaylistRename(const char *Oldname)
   char *buf=NULL;
   asprintf(&buf,"%s\t%s",tr("Old name:"),oldname);
   cOsdItem *old = new cOsdItem(buf,osContinue);
-#if APIVERSNUM >= 10307
   old->SetSelectable(false);
-#else
-  old->SetColor(clrWhite, clrBackground);
-#endif
   Add(old);
   free(buf);
 
@@ -1544,9 +1414,7 @@ static const char *MAINMENUENTRY  = "MP3";
 
 class cPluginMp3 : public cPlugin {
 private:
-#if APIVERSNUM >= 10330
   bool ExternalPlay(const char *path, bool test);
-#endif
 public:
   cPluginMp3(void);
   virtual ~cPluginMp3();
@@ -1554,23 +1422,15 @@ public:
   virtual const char *Description(void) { return tr(DESCRIPTION); }
   virtual const char *CommandLineHelp(void);
   virtual bool ProcessArgs(int argc, char *argv[]);
-#if APIVERSNUM >= 10131
   virtual bool Initialize(void);
-#else
-  virtual bool Start(void);
-#endif
   virtual void Housekeeping(void);
   virtual const char *MainMenuEntry(void);
   virtual cOsdObject *MainMenuAction(void);
   virtual cMenuSetupPage *SetupMenu(void);
   virtual bool SetupParse(const char *Name, const char *Value);
-#if APIVERSNUM >= 10330
   virtual bool Service(const char *Id, void *Data);
-#if APIVERSNUM >= 10331
   virtual const char **SVDRPHelpPages(void);
   virtual cString SVDRPCommand(const char *Command, const char *Option, int &ReplyCode);
-#endif
-#endif
   };
 
 cPluginMp3::cPluginMp3(void)
@@ -1673,13 +1533,9 @@ bool cPluginMp3::ProcessArgs(int argc, char *argv[])
   return true;
 }
 
-#if APIVERSNUM >= 10131
 bool cPluginMp3::Initialize(void)
-#else
-bool cPluginMp3::Start(void)
-#endif
 {
-  if(!CheckVDRVersion(1,1,29,"mp3")) return false;
+  if(!CheckVDRVersion(1,4,5,"mp3")) return false;
   plugin_name="mp3";
 #if APIVERSNUM < 10507
   i18n_name="mp3";
@@ -1756,17 +1612,13 @@ bool cPluginMp3::SetupParse(const char *Name, const char *Value)
       }
 #endif
     }
-#if APIVERSNUM >= 10307
   else if (!strcasecmp(Name, "ReplayDisplay"))      MP3Setup.ReplayDisplay = atoi(Value);
-#endif
   else if (!strcasecmp(Name, "HideMainMenu"))       MP3Setup.HideMainMenu  = atoi(Value);
   else if (!strcasecmp(Name, "KeepSelect"))         MP3Setup.KeepSelect    = atoi(Value);
   else if (!strcasecmp(Name, "TitleArtistOrder"))   MP3Setup.TitleArtistOrder = atoi(Value);
   else return false;
   return true;
 }
-
-#if APIVERSNUM >= 10330
 
 bool cPluginMp3::ExternalPlay(const char *path, bool test)
 {
@@ -1821,8 +1673,6 @@ bool cPluginMp3::Service(const char *Id, void *Data)
   return false;
 }
 
-#if APIVERSNUM >= 10331
-
 const char **cPluginMp3::SVDRPHelpPages(void)
 {
   static const char *HelpPages[] = {
@@ -1864,8 +1714,5 @@ cString cPluginMp3::SVDRPCommand(const char *Command, const char *Option, int &R
     }
   return NULL;
 }
-
-#endif // 1.3.31
-#endif // 1.3.30
 
 VDRPLUGINCREATOR(cPluginMp3); // Don't touch this!

@@ -1,7 +1,7 @@
 /*
  * MP3/MPlayer plugin to VDR (C++)
  *
- * (C) 2001-2006 Stefan Huelswitt <s.huelswitt@gmx.de>
+ * (C) 2001-2009 Stefan Huelswitt <s.huelswitt@gmx.de>
  *
  * This code is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -59,11 +59,7 @@ public:
   cFileObj(cFileSource *Source, const char *Subdir, const char *Name, const eObjType Type);
   cFileObj(const cFileObj *obj);
   virtual ~cFileObj();
-#if APIVERSNUM >= 10315
   virtual int Compare(const cListObject &ListObject) const;
-#else
-  virtual bool operator<(const cListObject &ListObject);
-#endif
   void SetName(const char *Name);
   void SplitAndSet(const char *Path);
   bool GuessType(void);
