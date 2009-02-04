@@ -103,7 +103,7 @@ private:
   static bool rewind;
   cMPlayerPlayer *player;
   cSkinDisplayReplay *display;
-  bool visible, modeOnly, haveBeauty;
+  bool visible, modeOnly;
   time_t timeoutShow;
   int lastCurrent, lastTotal;
   char *lastReplayMsg;
@@ -134,7 +134,7 @@ bool cMPlayerControl::rewind=false;
 cMPlayerControl::cMPlayerControl(void)
 :cControl(player=new cMPlayerPlayer(file,rewind))
 {
-  visible=modeOnly=jumpactive=haveBeauty=false;
+  visible=modeOnly=jumpactive=false;
   lastReplayMsg=0;
   display=0;
   ShowTitle();

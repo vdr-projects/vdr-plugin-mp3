@@ -442,15 +442,11 @@ void cMP3Control::ShowProgress(bool open, bool bigWin)
     cMP3PlayInfo *mode=new cMP3PlayInfo;
     bool valid=mgr->Info(-1,mode);
     bool changed=(!lastMode || mode->Hash!=lastMode->Hash);
-    char buf[256];
     if(changed) { d(printf("mp3-ctrl: mode change detected\n")) }
 
     if(valid) { // send progress to status monitor
-      if(changed || mode->Loop!=lastMode->Loop || mode->Shuffle!=lastMode->Shuffle) {
-        snprintf(buf,sizeof(buf),"[%c%c] (%d/%d) %s",
-                  mode->Loop?'L':'.',mode->Shuffle?'S':'.',mode->Num,mode->MaxNum,*TitleArtist(mode->Title,mode->Artist));
-        cStatus::MsgReplaying(this,buf,mode->Filename[0]?mode->Filename:0,true);
-        }
+      if(changed || mode->Loop!=lastMode->Loop || mode->Shuffle!=lastMode->Shuffle)
+        cStatus::MsgReplaying(this,cString::sprintf("[%c%c] (%d/%d) %s",mode->Loop?'L':'.',mode->Shuffle?'S':'.',mode->Num,mode->MaxNum,*TitleArtist(mode->Title,mode->Artist)),mode->Filename[0]?mode->Filename:0,true);
       }
 
     if(visible) { // refresh the OSD progress display
@@ -470,8 +466,7 @@ void cMP3Control::ShowProgress(bool open, bool bigWin)
         }
       else {
         if(!selecting && changed && !statusActive) {
-          snprintf(buf,sizeof(buf),"(%d/%d)",mode->Num,mode->MaxNum);
-          Write(0,-2,CTAB,buf);
+          Write(0,-2,CTAB,cString::sprintf("(%d/%d)",mode->Num,mode->MaxNum));
           flush=true;
           }
 
@@ -492,8 +487,7 @@ void cMP3Control::ShowProgress(bool open, bool bigWin)
             cProgressBar ProgressBar(bw-(CTAB+CTAB2)*fw,fh,index,total);
             osd->DrawBitmap(CTAB*fw,bh-fh,ProgressBar);
             }
-          snprintf(buf,sizeof(buf),total?"%02d:%02d/%02d:%02d":"%02d:%02d",index/60,index%60,total/60,total%60);
-          Write(0,-1,11,buf);
+          Write(0,-1,11,cString::sprintf(total?"%02d:%02d/%02d:%02d":"%02d:%02d",index/60,index%60,total/60,total%60));
           flush=true;
           }
         }
@@ -512,45 +506,41 @@ void cMP3Control::ShowProgress(bool open, bool bigWin)
           doflip=true;
 	  }
         if(doflip) {
-          buf[0]=0;
+          cString buff;
           switch(flip) {
 	    default:
 	      flip=0;
 	      // fall through
 	    case 0:
-	      snprintf(buf,sizeof(buf),"%s",*TitleArtist(mode->Title,mode->Artist));
+	      buff=TitleArtist(mode->Title,mode->Artist);
 	      flipint=6;
 	      break;
 	    case 1:
               if(mode->Album[0]) {
-      	        snprintf(buf,sizeof(buf),mode->Year>0?"from: %s (%d)":"from: %s",mode->Album,mode->Year);
+      	        buff=cString::sprintf(mode->Year>0?"from: %s (%d)":"from: %s",mode->Album,mode->Year);
 	        flipint=4;
+	        break;
 	        }
-              else fliptime=0;
-              break;
+              flip++;
+              // fall through
 	    case 2:
               if(mode->MaxBitrate>0)
-                snprintf(buf,sizeof(buf),"%.1f kHz, %d-%d kbps, %s",mode->SampleFreq/1000.0,mode->Bitrate/1000,mode->MaxBitrate/1000,mode->SMode);
+                buff=cString::sprintf("%.1f kHz, %d-%d kbps, %s",mode->SampleFreq/1000.0,mode->Bitrate/1000,mode->MaxBitrate/1000,mode->SMode);
               else
-                snprintf(buf,sizeof(buf),"%.1f kHz, %d kbps, %s",mode->SampleFreq/1000.0,mode->Bitrate/1000,mode->SMode);
+                buff=cString::sprintf("%.1f kHz, %d kbps, %s",mode->SampleFreq/1000.0,mode->Bitrate/1000,mode->SMode);
 	      flipint=3;
 	      break;
 	    }
-          if(buf[0]) {
-            if(MP3Setup.ReplayDisplay) {
-              char buf2[256];
-              snprintf(buf2,sizeof(buf2),"[%c%c] (%d/%d) %s",
-                       mode->Loop?'L':'.',mode->Shuffle?'S':'.',mode->Num,mode->MaxNum,buf);
-              disp->SetTitle(buf2);
+          if(MP3Setup.ReplayDisplay) {
+            disp->SetTitle(cString::sprintf("[%c%c] (%d/%d) %s",mode->Loop?'L':'.',mode->Shuffle?'S':'.',mode->Num,mode->MaxNum,*buff));
+            flush=true;
+            }
+          else {
+            if(!statusActive) {
+              DisplayInfo(buff);
               flush=true;
               }
-            else {
-              if(!statusActive) {
-                DisplayInfo(buf);
-                flush=true;
-                }
-              else { d(printf("mp3-ctrl: display info skip due to status active\n")) }
-              }
+            else { d(printf("mp3-ctrl: display info skip due to status active\n")) }
             }
           }
         }
@@ -565,19 +555,19 @@ void cMP3Control::ShowProgress(bool open, bool bigWin)
           for(int i=0 ; i<rows && i<MAXROWS && num<=mode->MaxNum ; i++,num++) {
             cMP3PlayInfo pi;
             mgr->Info(num,&pi); if(!pi.Title[0]) break;
-            snprintf(buf,sizeof(buf),"%d.\t%s",num,*TitleArtist(pi.Title,pi.Artist));
+            cString buff=cString::sprintf("%d.\t%s",num,*TitleArtist(pi.Title,pi.Artist));
             int fg=clrWhite, bg=clrGray50;
-            int hash=MakeHash(buf);
+            int hash=MakeHash(buff);
             if(num==mode->Num) { fg=clrBlack; bg=clrCyan; hash=(hash^77) + 23; }
             if(all || hash!=hashlist[i]) {
-              char *s=rindex(buf,'\t');
+              char *s=rindex(buff,'\t');
               if(s) {
                 *s++=0;
-                Write(0,i,5,buf,fg,bg);
+                Write(0,i,5,buff,fg,bg);
                 Write(5,i,bwc-5,s,fg,bg);
                 }
               else
-                Write(0,i,bwc,buf,fg,bg);
+                Write(0,i,bwc,buff,fg,bg);
               flush=true;
               hashlist[i]=hash;
               }
