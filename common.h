@@ -31,14 +31,6 @@
 #endif
 #include "config.h"
 
-#define SLEEP(x) cCondWait::SleepMs(x)
-
-#include <vdr/tools.h>
-static cTimeMs __time;
-#define time_ms() ((int)__time.Elapsed())
-
-#define BUTTON "Button$"
-
 #if !defined(NO_DEBUG) && defined(DEBUG)
 #define d(x) { (x); }
 #else

@@ -909,13 +909,13 @@ void cPlayManager::Throttle(bool thr)
 {
   if(MP3Setup.BgrScan) {
     if(!thr && throttle) {
-      db(printf("mgr: bgr-scan -> run (%d)\n",time_ms()))
+      db(printf("mgr: bgr-scan -> run (%llu)\n",cTimeMs::Now()))
       listMutex.Lock();
       throttle=false; bgCond.Broadcast();
       listMutex.Unlock();
       }
     if(thr && !throttle) {
-      db(printf("mgr: bgr-scan -> throttle (%d)\n",time_ms()))
+      db(printf("mgr: bgr-scan -> throttle (%llu)\n",cTimeMs::Now()))
       throttle=true;
       }
     }
@@ -1583,12 +1583,12 @@ void cMP3Player::Action(void)
   const unsigned char *p=0;
   int pc=0, readindex=0;
   bool imageValid=true;
-  int imageCheck=0;
+  cTimeMs imageCheck;
 #ifdef DEBUG
   int beat=0;
 #endif
 #ifdef DEBUG_DELAY
-  int lastwrite=0;
+  cTimeMs lastwrite(2000000);
 #endif
 
   dsyslog("mp3: player thread started (pid=%d)", getpid());
@@ -1622,13 +1622,13 @@ void cMP3Player::Action(void)
     Lock();
 
 next:
-    if(!pframe && playing && !imageValid && imageCheck<time_ms()) {
+    if(!pframe && playing && !imageValid && imageCheck.Elapsed()) {
       unsigned char *mem;
       int len;
-      imageCheck=time_ms()+250;
+      imageCheck.Set(250);
       imageValid=playing->Image(mem,len);
       if(mem) {
-        if(playindex) SLEEP(80); // stillpicture ioctl freezes without this
+        if(playindex) cCondWait::SleepMs(80); // stillpicture ioctl freezes without this
         DeviceStillPicture(mem,len);
         free(mem);
         }
@@ -1648,10 +1648,9 @@ next:
     if(pframe) {
 #ifdef DEBUG_DELAY
       {
-      int now=time_ms();
-      if(lastwrite && lastwrite<now-(DEBUG_DELAY+50))
-        printf("mp3: write delayed %d ms\n",now-lastwrite);
-      lastwrite=now;
+      if(lastwrite.TimedOut())
+        printf("mp3: write delayed %llu ms\n",lastwrite.Elapsed());
+      lastwrite.Set(DEBUG_DELAY+50);
       }
 #endif
       int w=output->Output(p,pc,SOF);
@@ -1714,12 +1713,11 @@ next:
         case msDecode:
           {
 #ifdef DEBUG_DELAY
-          int now=time_ms();
+          cTimeMs check(DEBUG_DELAY);
 #endif
           struct Decode *ds=decoder->Decode();
 #ifdef DEBUG_DELAY
-          now=time_ms()-now;
-          if(now>DEBUG_DELAY) printf("mp3: decode delayed %d ms\n",now);
+          if(check.TimedOut()) printf("mp3: decode delayed %llu ms\n",check.Elapsed());
 #endif
           switch(ds->status) {
             case dsPlay:
@@ -1837,14 +1835,14 @@ next:
     else if(playMode!=pmPlay) {
       mgr->Throttle(false);
       if(!imageValid)
-        SLEEP(100);
+        cCondWait::SleepMs(100);
       else {
         playModeMutex.Lock();
         if(playMode!=pmPlay) WaitPlayMode(playMode,true);
         playModeMutex.Unlock();
         }
 #ifdef DEBUG_DELAY
-      lastwrite=0;
+      lastwrite.Set(2000000);
 #endif
       }
     else if(state!=msWait && ringBuffer->Available()<(MP3BUFSIZE*50/100)) {

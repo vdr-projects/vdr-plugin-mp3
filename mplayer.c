@@ -471,7 +471,7 @@ void cMenuMPlayBrowse::SetButtons(void)
 {
   static char blue[12];
   snprintf(blue,sizeof(blue),MPlayerAid>=0 ? "AID:%d" : "AID:def",MPlayerAid);
-  SetHelp(trVDR(BUTTON"Play"), MPlayerSetup.ResumeMode ? trVDR(BUTTON"Rewind"):0, tr("Source"), blue);
+  SetHelp(trVDR("Button$Play"), MPlayerSetup.ResumeMode ? trVDR("Button$Rewind"):0, tr("Source"), blue);
   Display();
 }
 

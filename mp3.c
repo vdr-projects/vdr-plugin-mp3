@@ -187,17 +187,15 @@ void cAsyncStatus::Finish(void)
 
 // --- --------------------------------------------------------------------
 
-static const char *TitleArtist(const char *title, const char *artist)
+static cString TitleArtist(const char *title, const char *artist)
 {
-  static char buf[256]; // clearly not multi-thread save!
   const char *fmt;
   if(artist && artist[0]) {
     if(MP3Setup.TitleArtistOrder) fmt="%2$s - %1$s";
     else  fmt="%s - %s";
     }
   else fmt="%s";
-  snprintf(buf,sizeof(buf),fmt,title,artist);
-  return buf;
+  return cString::sprintf(fmt,title,artist);
 }
 
 // --- cMP3Control --------------------------------------------------------
@@ -214,7 +212,8 @@ private:
   cMP3Player *player;
   bool visible, shown, bigwin, statusActive;
   time_t timeoutShow, greentime, oktime;
-  int lastkeytime, number;
+  cTimeMs lastkeytime;
+  int number;
   bool selecting;
   //
   cMP3PlayInfo *lastMode;
@@ -254,7 +253,7 @@ cMP3Control::cMP3Control(void)
 {
   visible=shown=bigwin=selecting=jumpactive=jumphide=statusActive=false;
   timeoutShow=greentime=oktime=0;
-  lastkeytime=number=0;
+  number=0;
   lastMode=0;
   framesPerSecond=SecondsToFrames(1);
   osd=0; disp=0;
@@ -449,7 +448,7 @@ void cMP3Control::ShowProgress(bool open, bool bigWin)
     if(valid) { // send progress to status monitor
       if(changed || mode->Loop!=lastMode->Loop || mode->Shuffle!=lastMode->Shuffle) {
         snprintf(buf,sizeof(buf),"[%c%c] (%d/%d) %s",
-                  mode->Loop?'L':'.',mode->Shuffle?'S':'.',mode->Num,mode->MaxNum,TitleArtist(mode->Title,mode->Artist));
+                  mode->Loop?'L':'.',mode->Shuffle?'S':'.',mode->Num,mode->MaxNum,*TitleArtist(mode->Title,mode->Artist));
         cStatus::MsgReplaying(this,buf,mode->Filename[0]?mode->Filename:0,true);
         }
       }
@@ -519,7 +518,7 @@ void cMP3Control::ShowProgress(bool open, bool bigWin)
 	      flip=0;
 	      // fall through
 	    case 0:
-	      snprintf(buf,sizeof(buf),"%s",TitleArtist(mode->Title,mode->Artist));
+	      snprintf(buf,sizeof(buf),"%s",*TitleArtist(mode->Title,mode->Artist));
 	      flipint=6;
 	      break;
 	    case 1:
@@ -566,7 +565,7 @@ void cMP3Control::ShowProgress(bool open, bool bigWin)
           for(int i=0 ; i<rows && i<MAXROWS && num<=mode->MaxNum ; i++,num++) {
             cMP3PlayInfo pi;
             mgr->Info(num,&pi); if(!pi.Title[0]) break;
-            snprintf(buf,sizeof(buf),"%d.\t%s",num,TitleArtist(pi.Title,pi.Artist));
+            snprintf(buf,sizeof(buf),"%d.\t%s",num,*TitleArtist(pi.Title,pi.Artist));
             int fg=clrWhite, bg=clrGray50;
             int hash=MakeHash(buf);
             if(num==mode->Num) { fg=clrBlack; bg=clrCyan; hash=(hash^77) + 23; }
@@ -744,7 +743,7 @@ eOSState cMP3Control::ProcessKey(eKeys Key)
       if(lastMode && number>0 && number<=lastMode->MaxNum) {
         if(!visible) ShowTimed(SELECTHIDE_TIMEOUT);
         else if(timeoutShow>0) timeoutShow=time(0)+SELECTHIDE_TIMEOUT;
-        selecting=true; lastkeytime=time_ms();
+        selecting=true; lastkeytime.Set(SELECT_TIMEOUT);
         char buf[32];
         if(MP3Setup.ReplayDisplay) {
           snprintf(buf,sizeof(buf),"%s%d-/%d",trVDR("Jump: "),number,lastMode->MaxNum);
@@ -757,10 +756,10 @@ eOSState cMP3Control::ProcessKey(eKeys Key)
         Flush();
         break;
         }
-      number=0; lastkeytime=0;
+      number=0; lastkeytime.Set();
       // fall through
     case kNone:
-      if(selecting && time_ms()-lastkeytime>SELECT_TIMEOUT) {
+      if(selecting && lastkeytime.TimedOut()) {
         if(number>0) { mgr->Goto(number); player->Play();  }
         if(lastMode) lastMode->Hash=-1;
         number=0; selecting=false;
@@ -954,7 +953,7 @@ void cMenuPlayListItem::Set(void)
   cSongInfo *si=song->Info(false);
   if(showID3 && !si) si=song->Info();
   if(showID3 && si && si->Title)
-    asprintf(&buffer, "%d.\t%s",song->Index()+1,TitleArtist(si->Title,si->Artist));
+    asprintf(&buffer, "%d.\t%s",song->Index()+1,*TitleArtist(si->Title,si->Artist));
   else
     asprintf(&buffer, "%d.\t<%s>",song->Index()+1,song->Name());
   SetText(buffer,false);
@@ -995,7 +994,7 @@ cMenuPlayList::cMenuPlayList(cPlayList *Playlist)
 
 void cMenuPlayList::Buttons(void)
 {
-  SetHelp(tr("Add"), showid3?tr("Filenames"):tr("ID3 names"), tr("Remove"), trVDR(BUTTON"Mark"));
+  SetHelp(tr("Add"), showid3?tr("Filenames"):tr("ID3 names"), tr("Remove"), trVDR("Button$Mark"));
 }
 
 void cMenuPlayList::Refresh(bool all)
@@ -1213,10 +1212,10 @@ eOSState cMenuMP3::SetButtons(int num)
 {
   switch(num) {
     case 1:
-      SetHelp(trVDR(BUTTON"Edit"), tr("Source"), tr("Browse"), ">>");
+      SetHelp(trVDR("Button$Edit"), tr("Source"), tr("Browse"), ">>");
       break;
     case 2:
-      SetHelp("<<", trVDR(BUTTON"New"), trVDR(BUTTON"Delete"), tr("Rename"));
+      SetHelp("<<", trVDR("Button$New"), trVDR("Button$Delete"), tr("Rename"));
       break;
     }
   buttonnum=num; Display();
@@ -1355,7 +1354,7 @@ eOSState cMenuMP3::Instant(bool second)
 
   if(!second) {
     instanting=true;
-    return AddSubMenu(new cMenuInstantBrowse(MP3Sources.GetSource(),trVDR(BUTTON"Play"),tr("Play all")));
+    return AddSubMenu(new cMenuInstantBrowse(MP3Sources.GetSource(),trVDR("Button$Play"),tr("Play all")));
     }
   instanting=false;
   cFileObj *item=cMenuInstantBrowse::GetSelected();

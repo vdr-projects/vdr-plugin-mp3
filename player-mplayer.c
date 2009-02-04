@@ -323,15 +323,15 @@ void cMPlayerPlayer::Activate(bool On)
       if(slave) {
         Play(); // MPlayer ignores "quit" while paused
         MPlayerControl("quit");
-        int until=time_ms()+3000; // wait some time until MPlayer is gone
+        cTimeMs until(3000); // wait some time until MPlayer is gone
         d(printf("mplayer: waiting for child exit"))
         while(Active()) {
-          if(time_ms()>until) {
+          if(until.TimedOut()) {
             kill(pid,SIGKILL); // kill it anyways
             d(printf(" SIGKILL"))
             break;
             }
-          SLEEP(250);
+          cCondWait::SleepMs(250);
           d(printf(".")) d(fflush(stdout))
           }
         d(printf("\n"))
