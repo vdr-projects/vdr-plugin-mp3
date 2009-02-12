@@ -1,7 +1,7 @@
 /*
  * MP3/MPlayer plugin to VDR (C++)
  *
- * (C) 2001-2007 Stefan Huelswitt <s.huelswitt@gmx.de>
+ * (C) 2001-2009 Stefan Huelswitt <s.huelswitt@gmx.de>
  *
  * This code is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -58,6 +58,7 @@
 
 #define CDDB_PROTO 5                   // used protocol level
 #define CDDB_TOUT  30*1000             // connection timeout (ms)
+#define CDDB_CHARSET "ISO8859-1"       // data charset
 
 const char *cddbpath="/var/lib/cddb";  // default local cddb path
 
@@ -410,7 +411,7 @@ private:
   //
   cCDDBSong *GetTrack(const char *name, unsigned int pos);
   cCDDBSong *FindTrack(int tr);
-  void Strcat(char * &store, char *value);
+  void Strcat(char * &store, const char *value);
   bool Split(const char *source, char div, char * &first, char * &second, bool only3=false);
   void Put(const char *from, char * &to);
   void Clean(void);
@@ -472,6 +473,7 @@ bool cCDDBDisc::Load(cDiscID *id, const char *filename)
   DiscID=id->discid;
   FILE *f=fopen(filename,"r");
   if(f) {
+    cCharSetConv csc(CDDB_CHARSET);
     char buff[1024];
     while(fgets(buff,sizeof(buff),f)) {
       int i=strlen(buff);
@@ -484,7 +486,7 @@ bool cCDDBDisc::Load(cDiscID *id, const char *filename)
         if(p) {
            *p=0;
            char *name =compactspace(buff);
-           char *value=compactspace(p+1);
+           const char *value=csc.Convert(compactspace(p+1));
            if(*name && *value) {
              if(!strcasecmp(name,"DTITLE")) Strcat(DTitle,value);
              else if(!strcasecmp(name,"EXTD")) Strcat(ExtD,value);
@@ -588,7 +590,7 @@ bool cCDDBDisc::Split(const char *source, char div, char * &first, char * &secon
   return false;
 }
 
-void cCDDBDisc::Strcat(char * &store, char *value)
+void cCDDBDisc::Strcat(char * &store, const char *value)
 {
   if(store) {
     char *n=MALLOC(char,strlen(store)+strlen(value)+1);
@@ -828,6 +830,7 @@ bool cSndInfo::DoScan(bool KeepOpen)
   cCacheData *dat=InfoCache.Search(file);
   if(dat) {
     Set(dat); dat->Unlock();
+    ConvertToSys();
     if(!DecoderID) {
       DecoderID=DEC_SND;
       InfoCache.Cache(this,file);
@@ -850,7 +853,8 @@ bool cSndInfo::DoScan(bool KeepOpen)
 
   InfoDone();
   InfoCache.Cache(this,file);
-  return Abort(true);  
+  ConvertToSys();
+  return Abort(true);
 }
 
 bool cSndInfo::CDDBLookup(const char *filename)

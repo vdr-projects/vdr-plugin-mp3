@@ -1,7 +1,7 @@
 /*
  * MP3/MPlayer plugin to VDR (C++)
  *
- * (C) 2001-2005 Stefan Huelswitt <s.huelswitt@gmx.de>
+ * (C) 2001-2009 Stefan Huelswitt <s.huelswitt@gmx.de>
  *
  * This code is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -38,7 +38,7 @@ struct Decode {
 
 // ----------------------------------------------------------------
 
-#define CACHE_VERSION 7
+#define CACHE_VERSION 8
 
 class cCacheData : public cSongInfo, public cFileInfo, public cListObject {
 friend class cInfoCache;
@@ -46,13 +46,15 @@ private:
   int hash, version;
   time_t touch;
   cMutex lock;
+  //
+  bool Check8bit(const char *str);
 protected:
   bool Save(FILE *f);
   bool Load(FILE *f);
   bool Upgrade(void);
   void Touch(void);
   bool Purge(void);
-  void Create(cFileInfo *fi, cSongInfo *si);
+  void Create(cFileInfo *fi, cSongInfo *si, bool update);
 public:
   cCacheData(void);
   void Lock(void) { lock.Lock(); }

@@ -1541,6 +1541,9 @@ bool cPluginMp3::Initialize(void)
 #if APIVERSNUM < 10507
   RegisterI18n(Phrases);
 #endif
+#if APIVERSNUM < 10503
+  cCharSetConv::SetSystemCharacterTableX(I18nCharSets()[Setup.OSDLanguage]);
+#endif
   mgr=new cPlayManager;
   if(!mgr) {
     esyslog("ERROR: creating playmanager failed");

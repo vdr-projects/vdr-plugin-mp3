@@ -1,7 +1,7 @@
 /*
  * MP3/MPlayer plugin to VDR (C++)
  *
- * (C) 2001-2005 Stefan Huelswitt <s.huelswitt@gmx.de>
+ * (C) 2001-2009 Stefan Huelswitt <s.huelswitt@gmx.de>
  *
  * This code is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -369,6 +369,7 @@ bool cScanID3::DoScan(bool KeepOpen)
   cCacheData *dat=InfoCache.Search(str);
   if(dat) {
     Set(dat); dat->Unlock();
+    ConvertToSys();
     if(!DecoderID) {
       DecoderID=DEC_MP3;
       InfoCache.Cache(this,str);
@@ -518,6 +519,7 @@ bool cScanID3::DoScan(bool KeepOpen)
 
       if(!has_id3 || !Title) FakeTitle(str->Filename,".mp3");
       InfoCache.Cache(this,str);
+      ConvertToSys();
       }
     }
   return Abort(res);
@@ -612,12 +614,7 @@ void cScanID3::ParseStr(const struct id3_tag *tag, const char *id, char * &data)
     const id3_ucs4_t *ucs4=id3_field_getstrings(field,0);
     if(!ucs4) return;
     if(!strcmp(id,ID3_FRAME_GENRE)) ucs4=id3_genre_name(ucs4);
-
-    id3_latin1_t *latin1=id3_ucs4_latin1duplicate(ucs4);
-    if(!latin1) return;
-
-    data=strdup((char *)latin1);
-    free(latin1);
+    data=(char *)id3_ucs4_utf8duplicate(ucs4);
     }
 }
 

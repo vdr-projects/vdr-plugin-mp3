@@ -1,7 +1,7 @@
 /*
  * MP3/MPlayer plugin to VDR (C++)
  *
- * (C) 2001-2007 Stefan Huelswitt <s.huelswitt@gmx.de>
+ * (C) 2001-2009 Stefan Huelswitt <s.huelswitt@gmx.de>
  *
  * This code is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -37,16 +37,18 @@ extern int MakeHashBuff(const char *buff, int len);
 
 class cSongInfo {
 private:
-  bool infoDone;
+  bool infoDone, utf8clean;
 protected:
   void Clear(void);
-  void Set(cSongInfo *si);
+  void Set(cSongInfo *si, bool update=false);
   void FakeTitle(const char *filename, const char *extention=0);
   void InfoDone(void) { infoDone=true; }
 public:
   cSongInfo(void);
   ~cSongInfo();
   bool HasInfo(void) { return infoDone; }
+  bool Utf8Clean(void) { return utf8clean; }
+  void ConvertToSys(void);
   // Song
   char *Title, *Artist, *Album;
   int Year, Frames, Total;

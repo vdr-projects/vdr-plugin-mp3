@@ -1,7 +1,7 @@
 #
 # MP3/MPlayer plugin to VDR
 #
-# (C) 2001-2008 Stefan Huelswitt <s.huelswitt@gmx.de>
+# (C) 2001-2009 Stefan Huelswitt <s.huelswitt@gmx.de>
 #
 # This code is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -108,7 +108,7 @@ COM_OBJS = data.o menu.o version.o
 OBJS     = $(PLUGIN).o $(COM_OBJS)\
             data-mp3.o setup-mp3.o player-mp3.o stream.o network.o\
             decoder.o decoder-mp3.o decoder-mp3-stream.o decoder-snd.o \
-            decoder-ogg.o
+            decoder-ogg.o compat.o
 LIBS     = -lmad -lid3tag
 
 ifndef WITHOUT_LIBSNDFILE

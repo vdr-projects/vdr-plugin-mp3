@@ -19,23 +19,30 @@
  * Or, point your browser to http://www.gnu.org/copyleft/gpl.html
  */
 
-#ifndef ___COMMON_H
-#define ___COMMON_H
-
-#ifndef PLUGIN_NAME_I18N
-#define PLUGIN_NAME_I18N "dummy"
-#endif
+#ifndef ___COMPAT_H
+#define ___COMPAT_H
 
 #ifndef APIVERSNUM
 #include <vdr/config.h>
 #endif
-#include "config.h"
-#include "compat.h"
 
-#if !defined(NO_DEBUG) && defined(DEBUG)
-#define d(x) { (x); }
-#else
-#define d(x) ; 
+#if APIVERSNUM < 10503
+#include <iconv.h>
+
+class cCharSetConv {
+private:
+  iconv_t cd;
+  char *result;
+  size_t length;
+  static char *systemCharacterTable;
+public:
+  cCharSetConv(const char *FromCode = NULL, const char *ToCode = NULL);
+  ~cCharSetConv();
+  const char *Convert(const char *From, char *To = NULL, size_t ToLength = 0);
+  static const char *SystemCharacterTable(void) { return systemCharacterTable; }
+  static void SetSystemCharacterTableX(const char *CharacterTable);
+  };
+
 #endif
 
-#endif //___COMMON_H
+#endif //___COMPAT_H

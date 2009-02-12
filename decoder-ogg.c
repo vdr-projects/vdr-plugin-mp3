@@ -1,7 +1,7 @@
 /*
  * MP3/MPlayer plugin to VDR (C++)
  *
- * (C) 2001-2005 Stefan Huelswitt <s.huelswitt@gmx.de>
+ * (C) 2001-2009 Stefan Huelswitt <s.huelswitt@gmx.de>
  *
  * This code is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -147,6 +147,7 @@ bool cOggInfo::DoScan(bool KeepOpen)
   cCacheData *dat=InfoCache.Search(file);
   if(dat) {
     Set(dat); dat->Unlock();
+    ConvertToSys();
     if(!DecoderID) {
       DecoderID=DEC_OGG;
       InfoCache.Cache(this,file);
@@ -205,7 +206,8 @@ bool cOggInfo::DoScan(bool KeepOpen)
 
   InfoDone();
   InfoCache.Cache(this,file);
-  return Abort(true);  
+  ConvertToSys();
+  return Abort(true);
 }
 
 // --- cOggDecoder -------------------------------------------------------------

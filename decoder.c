@@ -1,7 +1,7 @@
 /*
  * MP3/MPlayer plugin to VDR (C++)
  *
- * (C) 2001-2007 Stefan Huelswitt <s.huelswitt@gmx.de>
+ * (C) 2001-2009 Stefan Huelswitt <s.huelswitt@gmx.de>
  *
  * This code is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -53,6 +53,35 @@ int MakeHashBuff(const char *buff, int len)
   return h;
 }
 
+// --- cStrConv ----------------------------------------------------------------
+
+class cStrConv : private cMutex {
+private:
+  cCharSetConv toSys;
+public:
+  cStrConv(void):toSys("UTF-8",cCharSetConv::SystemCharacterTable()) {}
+  char *ToSys(char *from);
+  };
+
+static cStrConv *strconv;
+  
+char *cStrConv::ToSys(char *from)
+{
+  if(from) {
+    Lock();
+    const char *r=toSys.Convert(from);
+    Unlock();
+    if(r!=from) {
+      char *n=strdup(r);
+      if(n) {
+        free(from);
+        return n;
+        }
+      }
+    }
+  return from;
+}
+
 // --- cSongInfo ---------------------------------------------------------------
 
 cSongInfo::cSongInfo(void)
@@ -75,12 +104,18 @@ void cSongInfo::Clear(void)
   free(Album); Album=0;
   Year=-1;
   Level=Peak=0.0;
-  infoDone=false;
+  infoDone=false; utf8clean=true;
 }
 
-void cSongInfo::Set(cSongInfo *si)
+void cSongInfo::Set(cSongInfo *si, bool update)
 {
-  Clear(); InfoDone();
+  if(!update || si->Utf8Clean()) {
+    Clear();
+    Title=si->Title ? strdup(si->Title):0;
+    Artist=si->Artist ? strdup(si->Artist):0;
+    Album=si->Album ? strdup(si->Album):0;
+    utf8clean=si->utf8clean;
+    }
   Frames=si->Frames;
   Total=si->Total;
   SampleFreq=si->SampleFreq;
@@ -89,14 +124,12 @@ void cSongInfo::Set(cSongInfo *si)
   MaxBitrate=si->MaxBitrate;
   ChMode=si->ChMode;
   Year=si->Year;
-  Title=si->Title ? strdup(si->Title):0;
-  Artist=si->Artist ? strdup(si->Artist):0;
-  Album=si->Album ? strdup(si->Album):0;
   if(si->Level>0.0) { // preserve old level
     Level=si->Level;
     Peak=si->Peak;
     }
   DecoderID=si->DecoderID;
+  InfoDone();
 }
 
 void cSongInfo::FakeTitle(const char *filename, const char *extention)
@@ -118,6 +151,16 @@ void cSongInfo::FakeTitle(const char *filename, const char *extention)
         }
       d(printf("mp3: faking title '%s' from filename '%s'\n",Title,filename))
       }
+    }
+}
+
+void cSongInfo::ConvertToSys(void)
+{
+  if(cCharSetConv::SystemCharacterTable()) {
+    Title=strconv->ToSys(Title);
+    Artist=strconv->ToSys(Artist);
+    Album=strconv->ToSys(Album);
+    utf8clean=false;
     }
 }
 
@@ -349,8 +392,18 @@ bool cCacheData::Purge(void)
   return false;
 }
 
+bool cCacheData::Check8bit(const char *str)
+{
+  if(str) while(*str) if(*str++ & 0x80) return true;
+  return false;
+}
+
 bool cCacheData::Upgrade(void)
 {
+  if(version<8) {
+    if(Check8bit(Title) || Check8bit(Artist) || Check8bit(Album))
+      return false;              // Trash entries not 7bit clean
+    }
   if(version<7) {
     if(DecoderID==DEC_SND || (Title && startswith(Title,"track-")))
       return false;              // Trash older SND entries (incomplete)
@@ -372,10 +425,10 @@ bool cCacheData::Upgrade(void)
   return true;
 }
 
-void cCacheData::Create(cFileInfo *fi, cSongInfo *si)
+void cCacheData::Create(cFileInfo *fi, cSongInfo *si, bool update)
 {
   cFileInfo::Set(fi);
-  cSongInfo::Set(si);
+  cSongInfo::Set(si,update);
   hash=MakeHash(Filename);
   Touch();
 }
@@ -472,14 +525,14 @@ void cInfoCache::Cache(cSongInfo *info, cFileInfo *file)
   lock.Lock();
   cCacheData *dat=Search(file);
   if(dat) {
-    dat->Create(file,info);
+    dat->Create(file,info,true);
     Modified();
     dat->Unlock();
     d(printf("cache: updating infos for %s\n",file->Filename))
     }
   else {
     dat=new cCacheData;
-    dat->Create(file,info);
+    dat->Create(file,info,false);
     AddEntry(dat);
     d(printf("cache: caching infos for %s\n",file->Filename))
     }
@@ -601,6 +654,8 @@ void cInfoCache::Save(bool force)
 
 void cInfoCache::Load(void)
 {
+  if(!strconv) strconv=new cStrConv;
+
   char *name=CacheFile();
   if(access(name,F_OK)==0) {
     isyslog("loading id3 cache from %s",name);
