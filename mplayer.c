@@ -393,6 +393,12 @@ eOSState cMPlayerControl::ProcessKey(eKeys Key)
           case kAudio:
                     player->KeyCmd("switch_audio");
                     break;
+          case kNext:
+                    player->KeyCmd("seek_chapter +1");
+                    break;
+          case kPrev:
+                    player->KeyCmd("seek_chapter -1");
+                    break;
           case k0:
           case k1:
           case k2:
