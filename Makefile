@@ -134,6 +134,10 @@ ifdef DBG
   CXXFLAGS += -g
 endif
 
+ifneq ($(shell if test $(APIVERSNUM) -ge 010703; then echo "*"; fi),)
+  DEFINES += -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE
+endif
+
 ### Internationalization (I18N):
 
 PODIR     = po
