@@ -181,8 +181,7 @@ bool cMPlayerResume::OpenResume(const cFileObj *file)
     modified=global=false;
     free(resfile); resfile=0;
     delete resobj; resobj=new cFileObj(file);
-    char *s;
-    asprintf(&s,file->Subdir() ? "%s/%s":"%s",file->Source()->BaseDir(),file->Subdir());
+    char *s=aprintf(file->Subdir() ? "%s/%s":"%s",file->Source()->BaseDir(),file->Subdir());
     if(MPlayerSetup.ResumeMode==1 || 
        (access(s,W_OK) && (errno==EACCES || errno==EROFS))) {
       global=true;
@@ -581,7 +580,7 @@ void cMPlayerPlayer::MPlayerControl(const char *format, ...)
     va_list ap;
     va_start(ap,format);
     char *buff=0;
-    vasprintf(&buff,format,ap);
+    if(vasprintf(&buff,format,ap)<0);
     Lock();
     // check for writeable pipe i.e. prevent broken pipe signal
     if(!brokenPipe) {

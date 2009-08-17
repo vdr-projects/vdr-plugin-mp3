@@ -220,7 +220,7 @@ bool cFileInfo::FileInfo(bool log)
         FsType=0;
         struct statfs64 sfs;
         if(!statfs64(Filename,&sfs)) {
-          if(Removable()) asprintf(&FsID,"%llx:%llx",sfs.f_blocks,sfs.f_files);
+          if(Removable()) FsID=aprintf("%llx:%llx",sfs.f_blocks,sfs.f_files);
           FsType=sfs.f_type;
           }
         else if(errno!=ENOSYS && log) { esyslog("ERROR: can't statfs %s: %s",Filename,strerror(errno)); }
@@ -602,7 +602,7 @@ bool cInfoCache::Purge(void)
 void cInfoCache::Action(void)
 {
   d(printf("cache: id3 cache purge thread started (pid=%d)\n",getpid()))
-  nice(3);
+  if(nice(3)<0);
   lock.Lock();
   for(int i=0,n=0 ; i<CACHELINES && Running(); i++) {
     cCacheData *dat=FirstEntry(i);

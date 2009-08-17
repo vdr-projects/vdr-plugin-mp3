@@ -38,6 +38,7 @@
 #include "common.h"
 #include "setup-mp3.h"
 #include "network.h"
+#include "data.h"
 
 #define CON_TIMEOUT      30*1000   // default timeout (ms) for connect operation
 #define RW_TIMEOUT       30*1000   // default timeout (ms) for read/write operations
@@ -53,10 +54,9 @@ int RunCommand(const char *cmd, const char *State, const char *Name=0)
 {
   int res=-1;
   if(cmd) {
-    char *tmp=0;
-    if(Name)
-      asprintf(&tmp,"%s %s \"%s\"",cmd,State,*strescape(Name,"\"$"));
-    else asprintf(&tmp,"%s %s",cmd,State);
+    char *tmp;
+    if(Name) tmp=aprintf("%s %s \"%s\"",cmd,State,*strescape(Name,"\"$"));
+    else     tmp=aprintf("%s %s",cmd,State);
 
     d(printf("run: executing '%s'\n",tmp))
     res=SystemExec(tmp);

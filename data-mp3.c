@@ -93,11 +93,11 @@ bool cImageConvert::Status(void)
 
 void cImageConvert::Action(void)
 {
-  nice(3);
-  char *m, *cmd, *qp, *qm;
-  asprintf(&m,"%s%s.mpg",imagecache,image);
+  if(nice(3)<0);
+  char *qp, *qm;
+  char *m=aprintf("%s%s.mpg",imagecache,image);
   di(printf("image: convert started %s -> %s\n",image,m))
-  asprintf(&cmd,"%s \"%s\" \"%s\"",imageconv,qp=Quote(image),qm=Quote(m));
+  char *cmd=aprintf("%s \"%s\" \"%s\"",imageconv,qp=Quote(image),qm=Quote(m));
   int r=system(cmd);
   if(r!=0) di(printf("image: convert returned with code %d. Failed?\n",r))
   free(cmd); free(qp); free(qm); free(m);
@@ -264,9 +264,8 @@ bool cSong::FindImage(void)
 
 const char *cSong::CheckImage(const char *base) const
 {
-  char *p;
   int n;
-  asprintf(&p,"%s/%s.%n     ",obj->Source()->BaseDir(),base,&n);
+  char *p=aprintf("%s/%s.%n     ",obj->Source()->BaseDir(),base,&n);
   for(const char **s=img_suff; *s; s++) {
 #ifdef DEBUG
     if(strlen(*s)>5) printf("ERROR: buffer overflow in CheckImage ext=%s\n",*s);
@@ -300,8 +299,7 @@ bool cSong::Image(unsigned char * &mem, int &len)
   int res=0;
   if(image || FindImage()) {
     di(printf("image: loading image %s\n",image))
-    char *m;
-    asprintf(&m,"%s%s.mpg",imagecache,image);
+    char *m=aprintf("%s%s.mpg",imagecache,image);
     if(access(m,R_OK)) {
       di(printf("image: not cached\n"))
       if(queueStat<0) {
@@ -497,8 +495,8 @@ bool cPlayList::Delete(void)
 
 const char *cPlayList::AddExt(const char *FileName, const char *Ext)
 {
-  free(extbuffer); extbuffer=0;
-  asprintf(&extbuffer,"%s%s",FileName,Ext);
+  free(extbuffer);
+  extbuffer=aprintf("%s%s",FileName,Ext);
   return extbuffer;
 }
 

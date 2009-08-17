@@ -28,6 +28,7 @@
 #include "setup-mp3.h"
 #include "stream.h"
 #include "network.h"
+#include "data.h"
 #include "menu-async.h"
 #include "i18n.h"
 #include "version.h"
@@ -366,10 +367,10 @@ bool cNetStream::SendRequest(void)
   bool res=false;
   char buff[2048];
 
-  char *h, *p;
-  asprintf(&h,port!=DEFAULT_PORT ? "%s:%d":"%s",host,port);
-  if(MP3Setup.UseProxy) asprintf(&p,"http://%s%s",h,path);
-  else asprintf(&p,"%s",path);
+  char *p;
+  char *h=aprintf(port!=DEFAULT_PORT ? "%s:%d":"%s",host,port);
+  if(MP3Setup.UseProxy) p=aprintf("http://%s%s",h,path);
+  else p=aprintf("%s",path);
 
   char a[1024];
   a[0]=0;

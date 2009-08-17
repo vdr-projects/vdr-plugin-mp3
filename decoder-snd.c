@@ -732,8 +732,7 @@ bool cCDDB::RemoteGet(cDiscID *id)
               char *s=index(cat,' '); if(s) *s=0;
               code=DoCddbCmd("cddb read %s %08x\n",cat,id->discid);
               if(code==210) {
-                char *name=0;
-                asprintf(&name,"%s/%s/%08x",cddbpath,cat,id->discid);
+                char *name=aprintf("%s/%s/%08x",cddbpath,cat,id->discid);
                 if(MakeDirs(name,false)) {
                   FILE *out=fopen(name,"w");
                   if(out) {
@@ -790,7 +789,7 @@ int cCDDB::DoCddbCmd(const char *format, ...)
   va_list ap;
   va_start(ap,format);
   char *buff=0;
-  vasprintf(&buff,format,ap);
+  if(vasprintf(&buff,format,ap)<0);
   va_end(ap);
 #ifdef CDDB_DEBUG
   printf("cddb: -> %s",buff);

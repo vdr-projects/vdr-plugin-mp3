@@ -803,8 +803,7 @@ void cMenuID3Info::Build(cSongInfo *si, const char *name)
   if(si) {
     Item(tr("Filename"),name);
     if(si->HasInfo() && si->Total>0) {
-      char *buf=0;
-      asprintf(&buf,"%02d:%02d",si->Total/60,si->Total%60);
+      char *buf=aprintf("%02d:%02d",si->Total/60,si->Total%60);
       Item(tr("Length"),buf);
       free(buf);
       Item(tr("Title"),si->Title);
@@ -823,8 +822,7 @@ cOsdItem *cMenuID3Info::Item(const char *name, const char *format, const float n
 {
   cOsdItem *item;
   if(num>=0.0) {
-    char *buf=0;
-    asprintf(&buf,format?format:"%.f",num);
+    char *buf=aprintf(format?format:"%.f",num);
     item=Item(name,buf);
     free(buf);
     }
@@ -834,8 +832,7 @@ cOsdItem *cMenuID3Info::Item(const char *name, const char *format, const float n
 
 cOsdItem *cMenuID3Info::Item(const char *name, const char *text)
 {
-  char *buf=0;
-  asprintf(&buf,"%s:\t%s",name,text?text:"");
+  char *buf=aprintf("%s:\t%s",name,text?text:"");
   cOsdItem *item = new cOsdItem(buf,osBack);
   item->SetSelectable(false);
   free(buf);
@@ -939,13 +936,13 @@ void cMenuPlayListItem::Set(bool showid3)
 
 void cMenuPlayListItem::Set(void)
 {
-  char *buffer=0;
+  char *buffer;
   cSongInfo *si=song->Info(false);
   if(showID3 && !si) si=song->Info();
   if(showID3 && si && si->Title)
-    asprintf(&buffer, "%d.\t%s",song->Index()+1,*TitleArtist(si->Title,si->Artist));
+    buffer=aprintf("%d.\t%s",song->Index()+1,*TitleArtist(si->Title,si->Artist));
   else
-    asprintf(&buffer, "%d.\t<%s>",song->Index()+1,song->Name());
+    buffer=aprintf("%d.\t<%s>",song->Index()+1,song->Name());
   SetText(buffer,false);
 }
 
@@ -1109,8 +1106,7 @@ cPlaylistRename::cPlaylistRename(const char *Oldname)
   free(newname); newname=0;
 
   oldname=Oldname;
-  char *buf=NULL;
-  asprintf(&buf,"%s\t%s",tr("Old name:"),oldname);
+  char *buf=aprintf("%s\t%s",tr("Old name:"),oldname);
   cOsdItem *old = new cOsdItem(buf,osContinue);
   old->SetSelectable(false);
   Add(old);
@@ -1157,8 +1153,7 @@ cMenuMP3Item::cMenuMP3Item(cPlayList *PlayList)
 
 void cMenuMP3Item::Set(void)
 {
-  char *buffer=0;
-  asprintf(&buffer," %s",playlist->BaseName());
+  char *buffer=aprintf(" %s",playlist->BaseName());
   SetText(buffer,false);
 }
 
@@ -1440,7 +1435,7 @@ const char *cPluginMp3::CommandLineHelp(void)
   static char *help_str=0;
   
   free(help_str);    //                                     for easier orientation, this is column 80|
-  asprintf(&help_str,"  -m CMD,   --mount=CMD    use CMD to mount/unmount/eject mp3 sources\n"
+  help_str=aprintf(  "  -m CMD,   --mount=CMD    use CMD to mount/unmount/eject mp3 sources\n"
                      "                           (default: %s)\n"
                      "  -n CMD,   --network=CMD  execute CMD before & after network access\n"
                      "                           (default: %s)\n"

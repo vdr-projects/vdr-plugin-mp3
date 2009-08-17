@@ -31,6 +31,7 @@ class cFileSource;
 extern char *Quote(const char *str);
 extern char *AddPath(const char *dir, const char *filename);
 extern bool CheckVDRVersion(int Version, int Major, int Minor, const char *text=0);
+extern char *aprintf(const char *fmt, ...) __attribute__ ((format (printf,1,2)));
 
 // ----------------------------------------------------------------
 

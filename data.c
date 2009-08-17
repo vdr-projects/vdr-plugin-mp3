@@ -23,6 +23,7 @@
 #include <dirent.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include <errno.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -60,8 +61,7 @@ char *Quote(const char *str)
 
 char *AddPath(const char *dir, const char *filename)
 {
-  char *name=0;
-  asprintf(&name,"%s/%s",dir,filename);
+  char *name=aprintf("%s/%s",dir,filename);
   return name;
 }
 
@@ -84,13 +84,23 @@ bool CheckVDRVersion(int Version, int Major, int Minor, const char *text)
   return true;
 }
 
+char *aprintf(const char *fmt, ...)
+{
+  va_list ap;
+  va_start(ap,fmt);
+  char *str=0;
+  if(vasprintf(&str,fmt,ap)<0);
+  va_end(ap);
+  return str;
+}
+
 // -- cScanDir --------------------------------------------------------------
 
 bool cScanDir::ScanDir(cFileSource *src, const char *subdir, eScanType type, const char * const *spec, const char * const *excl, bool recursiv)
 {
   bool res=true;
-  char *dir, *f=0;
-  asprintf(&dir,subdir ? "%s/%s":"%s",src->BaseDir(),subdir);
+  char *f=0;
+  char *dir=aprintf(subdir ? "%s/%s":"%s",src->BaseDir(),subdir);
   DIR *d=opendir(dir);
   if(d) {
     struct dirent64 *e;
@@ -113,8 +123,7 @@ bool cScanDir::ScanDir(cFileSource *src, const char *subdir, eScanType type, con
         }
       if(S_ISDIR(st.st_mode)) {
         if(type==stFile && recursiv) {
-          char *s;
-          asprintf(&s,subdir ? "%2$s/%1$s":"%s",e->d_name,subdir);
+          char *s=aprintf(subdir ? "%2$s/%1$s":"%s",e->d_name,subdir);
           res=ScanDir(src,s,type,spec,excl,recursiv);
           free(s);
           if(!res) break;
@@ -256,15 +265,15 @@ void cFileObj::SetName(const char *Name)
 
 void cFileObj::Set(void)
 {
-  free(path); path=0;
-  asprintf(&path,subdir ? "%2$s/%1$s":"%s",name,subdir);
+  free(path);
+  path=aprintf(subdir ? "%2$s/%1$s":"%s",name,subdir);
   free(fpath); fpath=0;
   MakeFullName(&fpath,name);
 }
 
 void cFileObj::MakeFullName(char **fp, const char *Name)
 {
-  asprintf(fp,subdir ? "%1$s/%3$s/%2$s":"%s/%s",source->BaseDir(),Name,subdir);
+  *fp=aprintf(subdir ? "%1$s/%3$s/%2$s":"%s/%s",source->BaseDir(),Name,subdir);
 }
 
 bool cFileObj::GuessType(void)
@@ -498,8 +507,7 @@ bool cFileSource::Action(eAction act)
 {
   static const char *str[] = { "mount","unmount","eject","status" };
   
-  char *cmd=0;
-  asprintf(&cmd,"%s %s %s",mountscript,str[act],basedir);
+  char *cmd=aprintf("%s %s %s",mountscript,str[act],basedir);
   bool res=(system(cmd)==0);
   free(cmd);
   return res;

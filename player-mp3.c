@@ -822,7 +822,7 @@ void cPlayManager::ThrottleWait(void)
 void cPlayManager::Action(void)
 {
   db(printf("mgr: background scan thread started (pid=%d)\n", getpid()))
-  nice(5);
+  if(nice(5)<0);
   listMutex.Lock();
   while(!stopscan) {
     for(scan=list.First(); !stopscan && !release && scan; scan=list.Next(scan)) {
@@ -1429,7 +1429,7 @@ bool cOutputOss::Reset(unsigned int sr)
         int real=sr;
         CHECK(ioctl(fd,SNDCTL_DSP_SPEED,&real));
         d(printf("oss: DSP samplerate now %d\n",real))
-        if(abs(real-sr)<sr/50) {
+        if((unsigned int)abs(real-sr)<sr/50) {
           outSr=sr;
           d(printf("mp3-oss: DSP reset done\n"))
           return true;

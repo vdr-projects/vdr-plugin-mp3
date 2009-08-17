@@ -71,8 +71,7 @@ cMenuBrowseItem::cMenuBrowseItem(cFileObj *Item)
 
 void cMenuBrowseItem::Set(void)
 {
-  char *buffer=0;
-  asprintf(&buffer,item->Type()==otFile?"%s":"[%s]",item->Name());
+  char *buffer=aprintf(item->Type()==otFile?"%s":"[%s]",item->Name());
   SetText(buffer,false);
 }
 
@@ -251,8 +250,7 @@ cMenuSourceItem::cMenuSourceItem(cFileSource *Source)
 
 void cMenuSourceItem::Set(void)
 {
-  char *buffer=0;
-  asprintf(&buffer, "%s\t%s\t%s", source->NeedsMount()?(source->Status()?"*":">"):"", source->Description(), source->BaseDir());
+  char *buffer=aprintf("%s\t%s\t%s", source->NeedsMount()?(source->Status()?"*":">"):"", source->Description(), source->BaseDir());
   SetText(buffer,false);
 }
 

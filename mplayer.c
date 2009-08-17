@@ -615,7 +615,7 @@ const char *cPluginMPlayer::CommandLineHelp(void)
   static char *help_str=0;
   
   free(help_str);    //                                     for easier orientation, this is column 80|
-  asprintf(&help_str,"  -m CMD,   --mount=CMD    use CMD to mount/unmount/eject mp3 sources\n"
+  help_str=aprintf(  "  -m CMD,   --mount=CMD    use CMD to mount/unmount/eject mp3 sources\n"
                      "                           (default: %s)\n"
                      "  -M CMD,   --mplayer=CMD  use CMD when calling MPlayer\n"
                      "                           (default: %s)\n"
