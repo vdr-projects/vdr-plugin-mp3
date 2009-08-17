@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: VDR 1.5.9\n"
 "Report-Msgid-Bugs-To: <s.huelswitt@gmx.de>\n"
-"POT-Creation-Date: 2007-12-17 19:14+0100\n"
+"POT-Creation-Date: 2009-08-17 08:31-0400\n"
 "PO-Revision-Date: 2007-08-27 16:33+0200\n"
 "Last-Translator: Stefan Huelswitt <s.huelswitt@gmx.de>\n"
 "Language-Team: <vdr@linuxtv.org>\n"
@@ -322,9 +322,6 @@ msgstr "Traditionnel"
 
 msgid "Slave"
 msgstr "Esclave"
-
-msgid "Setup.MPlayer$OSD position"
-msgstr "Position OSD"
 
 msgid "global only"
 msgstr "Global seulement"
