@@ -97,6 +97,7 @@ cMenuSetupMP3::cMenuSetupMP3(void)
   Add(new cMenuEditBoolItem(tr("Setup.MP3$Initial loop mode"),     &data.InitLoopMode));
   Add(new cMenuEditBoolItem(tr("Setup.MP3$Initial shuffle mode"),  &data.InitShuffleMode));
   Add(new cMenuEditBoolItem(tr("Setup.MP3$Abort player at end of list"),&data.AbortAtEOL));
+  Add(new cMenuEditBoolItem(tr("Setup.MP3$Enqueue to running playlist"),&data.EnqueueSongs));
   scan[0]=tr("disabled");
   scan[1]=tr("ID3 only");
   scan[2]=tr("ID3 & Level");
@@ -147,6 +148,7 @@ void cMenuSetupMP3::Store(void)
   SetupStore("HideMainMenu",     MP3Setup.HideMainMenu   );
   SetupStore("KeepSelect",       MP3Setup.KeepSelect     );
   SetupStore("TitleArtistOrder", MP3Setup.TitleArtistOrder);
+  SetupStore("EnqueueSongs",     MP3Setup.EnqueueSongs   );
 }
 
 // --- cAsyncStatus ------------------------------------------------------------
@@ -283,6 +285,7 @@ bool cMP3Control::SetPlayList(cPlayList *plist)
   // is there a running MP3 player?
   if(control && typeid(*control)==typeid(cMP3Control)) {
     // add songs to running playlist
+    if(!MP3Setup.EnqueueSongs) mgr->Flush();
     mgr->Add(plist);
     res=true;
     }

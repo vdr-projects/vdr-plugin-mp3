@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: VDR 1.5.9\n"
 "Report-Msgid-Bugs-To: <s.huelswitt@gmx.de>\n"
-"POT-Creation-Date: 2009-08-17 08:31-0400\n"
+"POT-Creation-Date: 2009-08-17 09:00-0400\n"
 "PO-Revision-Date: 2007-08-27 16:33+0200\n"
 "Last-Translator: Stefan Huelswitt <s.huelswitt@gmx.de>\n"
 "Language-Team: <vdr@linuxtv.org>\n"
@@ -115,6 +115,9 @@ msgid "Setup.MP3$Initial shuffle mode"
 msgstr "Lectura aleatória inicial"
 
 msgid "Setup.MP3$Abort player at end of list"
+msgstr ""
+
+msgid "Setup.MP3$Enqueue to running playlist"
 msgstr ""
 
 msgid "disabled"

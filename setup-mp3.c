@@ -53,4 +53,5 @@ cMP3Setup::cMP3Setup(void)
   HideMainMenu = 0;
   KeepSelect = 0;
   TitleArtistOrder = 0;
+  EnqueueSongs = 1;
 }

@@ -66,6 +66,7 @@ public:
   int HideMainMenu;
   int KeepSelect;
   int TitleArtistOrder;
+  int EnqueueSongs;
 public:
   cMP3Setup(void);
   };
