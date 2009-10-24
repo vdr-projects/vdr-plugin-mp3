@@ -124,9 +124,8 @@ bool cScanDir::ScanDir(cFileSource *src, const char *subdir, eScanType type, con
       if(S_ISDIR(st.st_mode)) {
         if(type==stFile && recursiv) {
           char *s=aprintf(subdir ? "%2$s/%1$s":"%s",e->d_name,subdir);
-          res=ScanDir(src,s,type,spec,excl,recursiv);
+          ScanDir(src,s,type,spec,excl,recursiv);
           free(s);
-          if(!res) break;
           continue;
           }
         if(type!=stDir) continue;

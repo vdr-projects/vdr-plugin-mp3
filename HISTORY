@@ -1,7 +1,7 @@
 VDR Plugin Revision History
 ---------------------------
 
-..2007: Version 0.10.2 (vdr 1.6.0-2)
+..2009: Version 0.10.2 (vdr 1.6.0-2)
 - Fixed a segfault while direct song selection. Thanks to Halim Sahin for
   reporting.
 - Fixed possible division by zero in libsndfile decoder.
@@ -9,8 +9,12 @@ VDR Plugin Revision History
 - Added commandline option for a user defined default background image.
 - Made the handling of song information (e.g. ID3) UTF-8 aware. The infocache
   file is kept in UTF-8 format now.
+- Ignore errors while scaning recursive directories. Patch provided by Steffen
+  Kaiser.
 - Map audio-button to "switch_audio" and next/prev-button to "seek_chapter"
   slave command in MPlayer replay. Suggested by Martin Dauskardt.
+- Set the environment variable DVB_DEVICE with the number of the primary device
+  before calling mplayer.sh. Based on a patch from Marco Schinkel.
 - Use blocking IO for OSS output for improved compatibility. Suggested by Martin
   Dauskardt.
 - Backward compatible on-the-fly creation of the i18n.c file using Udo Richter's
