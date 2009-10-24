@@ -12,6 +12,9 @@ MPLAYER="mplayer"
 # mplayer options, -vc will be added below
 # add "-lircconf <lircrc>" to enable LIRC support
 OPTS="-vo mpegpes"
+if [ "aa$DVB_DEVICE" != "aa" ]; then
+  OPTS="-vo mpegpes:card=$DVB_DEVICE -ao mpegpes:card=$DVB_DEVICE"
+fi
 
 # mplayer options for SlaveMode
 SLAVE="-slave -quiet -nolirc"

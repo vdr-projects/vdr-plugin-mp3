@@ -397,6 +397,10 @@ bool cMPlayerPlayer::Fork(void)
     else aid[0]=0;
     snprintf(cmd,sizeof(cmd),"%s \"%s\" %s%s",MPlayerCmd,fname,MPlayerSetup.SlaveMode?"SLAVE":"",aid);
     free(fname);
+    // give index of primary dvb adapter device to mplayer via environment variable
+    char dvb[4];
+    snprintf(dvb,sizeof(dvb),"%d",cDevice::PrimaryDevice()->CardIndex()+1);
+    setenv("DVB_DEVICE",dvb,1);
     execle("/bin/sh","sh","-c",cmd,(char *)0,environ);
     esyslog("ERROR: exec failed for %s: (%d) %s",cmd,errno,strerror(errno));
     exit(127);

@@ -177,7 +177,9 @@ is included statically in the plugin).
 
 MPlayer is called through a script called "mplayer.sh" with the filename to
 play as first argument and the phrase SLAVE as second argument if slave mode is
-enabled. You can use the commandline option -M/--mplayer to change the name and
+enabled. Additional the environment variable DVB_DEVICE will be set with the
+number of the DVB card which VDR uses as primary display.
+You can use the commandline option -M/--mplayer to change the name and
 location of the mplayer script. The script has to call MPlayer with all the
 necessary options.
 
