@@ -36,6 +36,7 @@
 #include "decoder-mp3-stream.h"
 #include "decoder-snd.h"
 #include "decoder-ogg.h"
+#include "decoder-ogg-stream.h"
 
 #define CACHEFILENAME     "id3info.cache"
 #define CACHESAVETIMEOUT  120 // secs
@@ -258,6 +259,7 @@ cDecoder *cDecoders::FindDecoder(cFileObj *Obj)
 #endif
 #ifdef HAVE_VORBISFILE
         case DEC_OGG:  decoder=new cOggDecoder(full); break;
+        case DEC_OGGS: decoder=new cOggStreamDecoder(full); break;
 #endif
         default:       esyslog("ERROR: bad DecoderID '%s' from info cache: %s",cDecoders::ID2Str(dat->DecoderID),full); break;
         }
@@ -281,6 +283,10 @@ cDecoder *cDecoders::FindDecoder(cFileObj *Obj)
       decoder=new cOggDecoder(full);
       if(!decoder || !decoder->Valid()) { delete decoder; decoder=0; }
       }
+    if(!decoder) {
+      decoder=new cOggStreamDecoder(full);
+      if(!decoder || !decoder->Valid()) { delete decoder; decoder=0; }
+      }
 #endif
     if(!decoder) {
       decoder=new cMP3StreamDecoder(full);
@@ -302,6 +308,7 @@ const char *cDecoders::ID2Str(int id)
     case DEC_MP3S: return DEC_MP3S_STR;
     case DEC_SND:  return DEC_SND_STR;
     case DEC_OGG:  return DEC_OGG_STR;
+    case DEC_OGGS: return DEC_OGGS_STR;
     }
   return 0;
 }
@@ -312,6 +319,7 @@ int cDecoders::Str2ID(const char *str)
   else if(!strcmp(str,DEC_MP3S_STR)) return DEC_MP3S;
   else if(!strcmp(str,DEC_SND_STR )) return DEC_SND;
   else if(!strcmp(str,DEC_OGG_STR )) return DEC_OGG;
+  else if(!strcmp(str,DEC_OGGS_STR)) return DEC_OGGS;
   return 0;
 }
 

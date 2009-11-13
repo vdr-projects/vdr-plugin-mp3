@@ -212,24 +212,28 @@ bool cOggInfo::DoScan(bool KeepOpen)
 
 // --- cOggDecoder -------------------------------------------------------------
 
-cOggDecoder::cOggDecoder(const char *Filename)
+cOggDecoder::cOggDecoder(const char *Filename, bool preinit)
 :cDecoder(Filename)
-,file(Filename)
-,info(&file)
 {
-  pcm=0;
+  file=0; info=0; pcm=0;
+  if(preinit) {
+    file=new cOggFile(Filename);
+    info=new cOggInfo(file);
+  }
 }
 
 cOggDecoder::~cOggDecoder()
 {
   Clean();
+  delete info;
+  delete file;
 }
 
 bool cOggDecoder::Valid(void)
 {
   bool res=false;
   if(TryLock()) {
-    if(file.Open(false)) res=true;
+    if(file->Open(false)) res=true;
     Unlock();
     }
   return res;
@@ -238,9 +242,9 @@ bool cOggDecoder::Valid(void)
 cFileInfo *cOggDecoder::FileInfo(void)
 {
   cFileInfo *fi=0;
-  if(file.HasInfo()) fi=&file;
+  if(file->HasInfo()) fi=file;
   else if(TryLock()){
-    if(file.Open()) { fi=&file; file.Close(); }
+    if(file->Open()) { fi=file; file->Close(); }
     Unlock();
     }
   return fi;
@@ -249,9 +253,9 @@ cFileInfo *cOggDecoder::FileInfo(void)
 cSongInfo *cOggDecoder::SongInfo(bool get)
 {
   cSongInfo *si=0;
-  if(info.HasInfo()) si=&info;
+  if(info->HasInfo()) si=info;
   else if(get && TryLock()) {
-    if(info.DoScan(false)) si=&info;
+    if(info->DoScan(false)) si=info;
     Unlock();
     }
   return si;
@@ -261,7 +265,7 @@ cPlayInfo *cOggDecoder::PlayInfo(void)
 {
   if(playing) {
     pi.Index=index/1000;
-    pi.Total=info.Total;
+    pi.Total=info->Total;
     return &pi;
     }
   return 0;
@@ -278,7 +282,7 @@ bool cOggDecoder::Clean(void)
 {
   playing=false;
   delete pcm; pcm=0;
-  file.Close();
+  file->Close();
   return false;
 }
 
@@ -288,10 +292,10 @@ bool cOggDecoder::Start(void)
 {
   Lock(true);
   Init(); playing=true;
-  if(file.Open() && info.DoScan(true)) {
+  if(file->Open() && info->DoScan(true)) {
     d(printf("ogg: open rate=%d channels=%d seek=%d\n",
-             info.SampleFreq,info.Channels,file.CanSeek()))
-    if(info.Channels<=2) {
+             info->SampleFreq,info->Channels,file->CanSeek()))
+    if(info->Channels<=2) {
       Unlock();
       return true;
       }
@@ -324,15 +328,15 @@ struct Decode *cOggDecoder::Decode(void)
   Lock(); // this is released in Done()
   if(playing) {
     short framebuff[2*SF_SAMPLES];
-    int n=file.Stream(framebuff,SF_SAMPLES);
+    int n=file->Stream(framebuff,SF_SAMPLES);
     if(n<0) return Done(dsError);
     if(n==0) return Done(dsEof);
 
-    pcm->samplerate=info.SampleFreq;
-    pcm->channels=info.Channels;
+    pcm->samplerate=info->SampleFreq;
+    pcm->channels=info->Channels;
     n/=pcm->channels;
     pcm->length=n;
-    index=file.IndexMs();
+    index=file->IndexMs();
 
     short *data=framebuff;
     mad_fixed_t *sam0=pcm->samples[0], *sam1=pcm->samples[1]; 
@@ -347,6 +351,7 @@ struct Decode *cOggDecoder::Decode(void)
       for(; n>0 ; n--)
         *sam0++=(*data++) << s;
       }
+    info->InfoHook();
     return Done(dsPlay);
     }
   return Done(dsError);
@@ -356,15 +361,15 @@ bool cOggDecoder::Skip(int Seconds, float bsecs)
 {
   Lock();
   bool res=false;
-  if(playing && file.CanSeek()) {
+  if(playing && file->CanSeek()) {
     float fsecs=(float)Seconds - bsecs;
-    long long newpos=file.IndexMs()+(long long)(fsecs*1000.0);
+    long long newpos=file->IndexMs()+(long long)(fsecs*1000.0);
     if(newpos<0) newpos=0;
-    d(printf("ogg: skip: secs=%d fsecs=%f current=%lld new=%lld\n",Seconds,fsecs,file.IndexMs(),newpos))
+    d(printf("ogg: skip: secs=%d fsecs=%f current=%lld new=%lld\n",Seconds,fsecs,file->IndexMs(),newpos))
 
-    newpos=file.Seek(newpos,false);
+    newpos=file->Seek(newpos,false);
     if(newpos>=0) {
-      index=file.IndexMs();
+      index=file->IndexMs();
 #ifdef DEBUG
       int i=index/1000;
       printf("ogg: skipping to %02d:%02d\n",i/60,i%60);

@@ -1,7 +1,7 @@
 /*
  * MP3/MPlayer plugin to VDR (C++)
  *
- * (C) 2001-2005 Stefan Huelswitt <s.huelswitt@gmx.de>
+ * (C) 2001-2009 Stefan Huelswitt <s.huelswitt@gmx.de>
  *
  * This code is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -40,14 +40,16 @@ class cOggInfo;
 class cOggFile : public cFileInfo {
 friend class cOggInfo;
 private:
-  bool opened, canSeek;
+  bool canSeek;
+protected:
+  bool opened;
   OggVorbis_File vf;
   //
   void Error(const char *action, const int err);
 public:
   cOggFile(const char *Filename);
   ~cOggFile();
-  bool Open(bool log=true);
+  virtual bool Open(bool log=true);
   void Close(void);
   long long Seek(long long posMs=0, bool relativ=false);
   int Stream(short *buffer, int samples);
@@ -65,15 +67,14 @@ private:
   bool Abort(bool result);
 public:
   cOggInfo(cOggFile *File);
-  bool DoScan(bool KeepOpen=false);
+  virtual bool DoScan(bool KeepOpen=false);
+  virtual void InfoHook(void) {};
   };
 
 // ----------------------------------------------------------------
 
 class cOggDecoder : public cDecoder {
 private:
-  cOggFile file;
-  cOggInfo info;
   struct Decode ds;
   struct mad_pcm *pcm;
   unsigned long long index;
@@ -82,8 +83,11 @@ private:
   bool Clean(void);
   bool GetInfo(bool keepOpen);
   struct Decode *Done(eDecodeStatus status);
+protected:
+  cOggFile *file;
+  cOggInfo *info;
 public:
-  cOggDecoder(const char *Filename);
+  cOggDecoder(const char *Filename, bool preinit=true);
   ~cOggDecoder();
   virtual bool Valid(void);
   virtual cFileInfo *FileInfo(void);
