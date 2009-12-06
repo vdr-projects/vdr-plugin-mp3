@@ -563,11 +563,11 @@ void cMP3Control::ShowProgress(bool open, bool bigWin)
             int hash=MakeHash(buff);
             if(num==mode->Num) { fg=clrBlack; bg=clrCyan; hash=(hash^77) + 23; }
             if(all || hash!=hashlist[i]) {
-              char *s=rindex(buff,'\t');
+              const char *s=rindex(buff,'\t');
               if(s) {
-                *s++=0;
-                Write(0,i,5,buff,fg,bg);
                 Write(5,i,bwc-5,s,fg,bg);
+                buff.Truncate(s-buff);
+                Write(0,i,5,buff,fg,bg);
                 }
               else
                 Write(0,i,bwc,buff,fg,bg);

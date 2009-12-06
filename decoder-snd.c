@@ -579,7 +579,8 @@ bool cCDDBDisc::Load(cDiscID *id, const char *filename)
 bool cCDDBDisc::Split(const char *source, char div, char * &first, char * &second, bool only3)
 {
   int pos=-1, n=0;
-  char *p, l[4]={ ' ',div,' ',0 };
+  const char *p;
+  char l[4]={ ' ',div,' ',0 };
   if ((p=strstr(source,l))) { pos=p-source; n=3; }
   else if(!only3 && (p=strchr(source,div)))  { pos=p-source; n=1; }
   if(pos>=0) {
@@ -860,7 +861,7 @@ bool cSndInfo::CDDBLookup(const char *filename)
 {
   if(id->Get()) {
     int tr;
-    char *s=strstr(filename,CDFS_TRACK);
+    const char *s=strstr(filename,CDFS_TRACK);
     if(s && sscanf(s+strlen(CDFS_TRACK),"%d",&tr)==1) {
       d(printf("snd: looking up disc id %08x track %d\n",id->discid,tr))
       return cddb.Lookup(id,tr-1,this);

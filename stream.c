@@ -1,7 +1,7 @@
 /*
  * MP3/MPlayer plugin to VDR (C++)
  *
- * (C) 2001-2007 Stefan Huelswitt <s.huelswitt@gmx.de>
+ * (C) 2001-2009 Stefan Huelswitt <s.huelswitt@gmx.de>
  *
  * This code is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -406,7 +406,7 @@ bool cNetStream::SendRequest(void)
 
 bool cNetStream::ParseHeader(const char *buff, const char *name, char **value)
 {
-  char *s=index(buff,':');
+  const char *s=index(buff,':');
   if(s && !strncasecmp(buff,name,s-buff)) {
     s=skipspace(s+1);
     d(printf("netstream: found header '%s' contents '%s'\n",name,s))
@@ -528,7 +528,7 @@ bool cNetStream::Stream(unsigned char * &data, unsigned long &len, const unsigne
   return false;
 }
 
-char *cNetStream::ParseMetaString(const char *buff, const char *name, char **value)
+char *cNetStream::ParseMetaString(char *buff, const char *name, char **value)
 {
   char *s=index(buff,'=');
   if(s && !strncasecmp(buff,name,s-buff)) {

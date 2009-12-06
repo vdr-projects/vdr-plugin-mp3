@@ -412,7 +412,7 @@ void cFileSource::Set(const char *Basedir, const char *Description, const bool N
   description=strdup(Description);
   if(Include) {
     do {
-      char *s=index(Include,'/');
+      const char *s=index(Include,'/');
       int l=s ? s-Include : strlen(Include);
       if(l) {
         char **s=(char **)realloc(include,(incCount+2)*sizeof(char *));

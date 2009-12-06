@@ -137,7 +137,7 @@ void cSongInfo::FakeTitle(const char *filename, const char *extention)
 {
   // if no title, try to build a reasonable from the filename
   if(!Title && filename)  {
-    char *s=rindex(filename,'/');
+    const char *s=rindex(filename,'/');
     if(s && *s=='/') {
       s++;
       Title=strdup(s);
@@ -147,8 +147,8 @@ void cSongInfo::FakeTitle(const char *filename, const char *extention)
         if(l>0 && !strcasecmp(Title+l,extention)) Title[l]=0;
         }
       else {                                     // strip any extention
-        s=rindex(Title,'.');
-        if(s && *s=='.' && strlen(s)<=5) *s=0;
+        char *e=rindex(Title,'.');
+        if(e && *e=='.' && strlen(e)<=5) *e=0;
         }
       d(printf("mp3: faking title '%s' from filename '%s'\n",Title,filename))
       }

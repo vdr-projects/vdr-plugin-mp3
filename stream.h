@@ -1,7 +1,7 @@
 /*
  * MP3/MPlayer plugin to VDR (C++)
  *
- * (C) 2001-2006 Stefan Huelswitt <s.huelswitt@gmx.de>
+ * (C) 2001-2009 Stefan Huelswitt <s.huelswitt@gmx.de>
  *
  * This code is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -114,7 +114,7 @@ private:
   bool GetHTTPResponse(void);
   bool ParseHeader(const char *buff, const char *name, char **value);
   bool ParseMetaData(void);
-  char *ParseMetaString(const char *buff, const char *name, char **value);
+  char *ParseMetaString(char *buff, const char *name, char **value);
 public:
   cNetStream(const char *Filename);
   virtual ~cNetStream();

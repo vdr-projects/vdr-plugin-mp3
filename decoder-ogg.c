@@ -162,7 +162,7 @@ bool cOggInfo::DoScan(bool KeepOpen)
     for(int i=0 ; i<vc->comments ; i++) {
       const char *cc=vc->user_comments[i];
       d(printf("ogg: comment%d='%s'\n",i,cc))
-      char *p=strchr(cc,'=');
+      const char *p=strchr(cc,'=');
       if(p) {
         const int len=p-cc;
         p++;
