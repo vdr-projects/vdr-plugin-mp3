@@ -48,7 +48,7 @@ protected:
   void Error(const char *action, const int err);
 public:
   cOggFile(const char *Filename);
-  ~cOggFile();
+  virtual ~cOggFile();
   virtual bool Open(bool log=true);
   void Close(void);
   long long Seek(long long posMs=0, bool relativ=false);
@@ -67,6 +67,7 @@ private:
   bool Abort(bool result);
 public:
   cOggInfo(cOggFile *File);
+  virtual ~cOggInfo() {}
   virtual bool DoScan(bool KeepOpen=false);
   virtual void InfoHook(void) {};
   };
