@@ -1,11 +1,11 @@
 VDR Plugin Revision History
 ---------------------------
 
-..2009: Version 0.10.2 (vdr 1.6.0-2)
+29.12.2009: Version 0.10.2 (vdr 1.6.0-2)
 - Fixed a segfault while direct song selection. Thanks to Halim Sahin for
   reporting.
 - Fixed possible division by zero in libsndfile decoder.
-- Fixed some gcc 4.x warnings.
+- Fixed varoius warnings with never gcc versions.
 - Added commandline option for a user defined default background image.
 - Added OGG streaming support. Implemented by Manuel Reimer.
 - Made the handling of song information (e.g. ID3) UTF-8 aware. The infocache
@@ -23,6 +23,7 @@ VDR Plugin Revision History
 - Removed compatibility with VDR versions < 1.4.5.
 - Added italian translations.
 - Updated french and russian translations.
+- For detailed changes please refer to the HG history.
 
 27.08.2007: Version 0.10.1 (vdr 1.4.7 / 1.5.9)
 - Fixed segfault in MP3 infocache purge on plugin exit.
