@@ -1,7 +1,7 @@
 /*
  * MP3/MPlayer plugin to VDR (C++)
  *
- * (C) 2001-2009 Stefan Huelswitt <s.huelswitt@gmx.de>
+ * (C) 2001-2010 Stefan Huelswitt <s.huelswitt@gmx.de>
  *
  * This code is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -660,6 +660,17 @@ void cMPlayerPlayer::SkipSeconds(int secs)
     bool p=false;
     if(playMode==pmPaused) { Play(); p=true; }
     MPlayerControl("seek %+d 0",secs);
+    if(p) Pause();
+    saveIndex=-1;
+    }
+}
+
+void cMPlayerPlayer::SkipTrack(int dir, bool chapter)
+{
+  if(slave) {
+    bool p=false;
+    if(playMode==pmPaused) { Play(); p=true; }
+    MPlayerControl("%s %d",chapter ? "seek_chapter":"pt_step",dir);
     if(p) Pause();
     saveIndex=-1;
     }

@@ -1,7 +1,7 @@
 /*
  * MP3/MPlayer plugin to VDR (C++)
  *
- * (C) 2001-2009 Stefan Huelswitt <s.huelswitt@gmx.de>
+ * (C) 2001-2010 Stefan Huelswitt <s.huelswitt@gmx.de>
  *
  * This code is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -69,6 +69,7 @@ cMenuSetupMPlayer::cMenuSetupMPlayer(void)
   data=MPlayerSetup;
   SetSection(tr("MPlayer"));
   Add(new cMenuEditBoolItem(tr("Setup.MPlayer$Control mode"),  &data.SlaveMode, tr("Traditional"), tr("Slave")));
+  Add(new cMenuEditBoolItem(tr("Setup.MPlayer$Prev/Next keys"),&data.PrevNextKeyMode, tr("Chapter"), tr("Playlist")));
   res[0]=tr("disabled");
   res[1]=tr("global only");
   res[2]=tr("local first");
@@ -88,6 +89,7 @@ void cMenuSetupMPlayer::Store(void)
   SetupStore("ControlMode", MPlayerSetup.SlaveMode);
   SetupStore("HideMainMenu",MPlayerSetup.HideMainMenu);
   SetupStore("ResumeMode",  MPlayerSetup.ResumeMode);
+  SetupStore("PrevNextMode",MPlayerSetup.PrevNextKeyMode);
   for(int i=0; i<10; i++) {
     char name[16];
     snprintf(name,sizeof(name),"KeyCmd%d",i);
@@ -368,17 +370,15 @@ eOSState cMPlayerControl::ProcessKey(eKeys Key)
 
       case kRed:     Jump(); break;
 
-      case kGreen|k_Repeat:                      // temporary use
+      case kGreen|k_Repeat:
       case kGreen:   player->SkipSeconds(-60); break;
       case kYellow|k_Repeat:
       case kYellow:  player->SkipSeconds(60); break;
-  //    case kGreen|k_Repeat:                      // reserved for future use
-  //    case kGreen:   player->SkipPrev(); break;
-  //    case kYellow|k_Repeat:
-  //    case kYellow:  player->SkipNext(); break;
 
-      case kBack:
-                     Hide();
+      case kNext:    player->SkipTrack(1,MPlayerSetup.PrevNextKeyMode!=0); break;
+      case kPrev:    player->SkipTrack(-1,MPlayerSetup.PrevNextKeyMode!=0); break;
+
+      case kBack:    Hide();
                      cRemote::CallPlugin(plugin_name);
                      return osBack;
       case kStop:
@@ -392,12 +392,6 @@ eOSState cMPlayerControl::ProcessKey(eKeys Key)
                     break;
           case kAudio:
                     player->KeyCmd("switch_audio");
-                    break;
-          case kNext:
-                    player->KeyCmd("seek_chapter +1");
-                    break;
-          case kPrev:
-                    player->KeyCmd("seek_chapter -1");
                     break;
           case k0:
           case k1:
@@ -696,6 +690,7 @@ bool cPluginMPlayer::SetupParse(const char *Name, const char *Value)
   if(      !strcasecmp(Name, "ControlMode"))  MPlayerSetup.SlaveMode    = atoi(Value);
   else if (!strcasecmp(Name, "HideMainMenu")) MPlayerSetup.HideMainMenu = atoi(Value);
   else if (!strcasecmp(Name, "ResumeMode"))   MPlayerSetup.ResumeMode   = atoi(Value);
+  else if (!strcasecmp(Name, "PrevNextMode")) MPlayerSetup.PrevNextKeyMode = atoi(Value);
   else if (!strncasecmp(Name,"KeyCmd", 6) && strlen(Name)==7 && isdigit(Name[6]))
     strn0cpy(MPlayerSetup.KeyCmd[Name[6]-'0'],Value,sizeof(MPlayerSetup.KeyCmd[0]));
   else return false;

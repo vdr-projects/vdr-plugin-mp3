@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: VDR 1.5.9\n"
 "Report-Msgid-Bugs-To: <s.huelswitt@gmx.de>\n"
-"POT-Creation-Date: 2009-08-17 09:00-0400\n"
+"POT-Creation-Date: 2010-12-12 11:45+0100\n"
 "PO-Revision-Date: 2007-08-27 16:33+0200\n"
 "Last-Translator: Stefan Huelswitt <s.huelswitt@gmx.de>\n"
 "Language-Team: <vdr@linuxtv.org>\n"
@@ -324,6 +324,15 @@ msgstr "perinteinen"
 
 msgid "Slave"
 msgstr "orja"
+
+msgid "Setup.MPlayer$Prev/Next keys"
+msgstr ""
+
+msgid "Chapter"
+msgstr ""
+
+msgid "Playlist"
+msgstr ""
 
 msgid "global only"
 msgstr "globaali"

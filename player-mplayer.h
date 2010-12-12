@@ -1,7 +1,7 @@
 /*
  * MP3/MPlayer plugin to VDR (C++)
  *
- * (C) 2001-2006 Stefan Huelswitt <s.huelswitt@gmx.de>
+ * (C) 2001-2010 Stefan Huelswitt <s.huelswitt@gmx.de>
  *
  * This code is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -80,6 +80,7 @@ public:
   void Play(void);
   void Goto(int Index, bool percent, bool still);
   void SkipSeconds(int secs);
+  void SkipTrack(int dir, bool chapter);
   void KeyCmd(const char *cmd);
   char *GetCurrentName(void);
   virtual bool GetIndex(int &Current, int &Total, bool SnapToIFrame);
