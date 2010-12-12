@@ -1,7 +1,7 @@
 /*
  * MP3/MPlayer plugin to VDR (C++)
  *
- * (C) 2001-2009 Stefan Huelswitt <s.huelswitt@gmx.de>
+ * (C) 2001-2010 Stefan Huelswitt <s.huelswitt@gmx.de>
  *
  * OGG stream support initialy developed by Manuel Reimer <manuel.reimer@gmx.de>
  *
@@ -26,6 +26,8 @@
 
 #define DEC_OGGS     DEC_ID('O','G','G','S')
 #define DEC_OGGS_STR "OGGS"
+
+#ifdef HAVE_VORBISFILE
 
 #include "decoder-ogg.h"
 
@@ -65,4 +67,5 @@ public:
   virtual bool IsStream(void) { return true; }
   };
 
+#endif //HAVE_VORBISFILE
 #endif //___DECODER_OGG_STREAM_H

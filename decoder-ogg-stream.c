@@ -1,7 +1,7 @@
 /*
  * MP3/MPlayer plugin to VDR (C++)
  *
- * (C) 2001-2009 Stefan Huelswitt <s.huelswitt@gmx.de>
+ * (C) 2001-2010 Stefan Huelswitt <s.huelswitt@gmx.de>
  *
  * OGG stream support initialy developed by Manuel Reimer <manuel.reimer@gmx.de>
  *
@@ -20,6 +20,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  * Or, point your browser to http://www.gnu.org/copyleft/gpl.html
  */
+
+#ifdef HAVE_VORBISFILE
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -159,3 +161,5 @@ cOggStreamDecoder::cOggStreamDecoder(const char *Filename)
   file=nfile;
   info=new cNetOggInfo(nfile);
 }
+
+#endif //HAVE_VORBISFILE
