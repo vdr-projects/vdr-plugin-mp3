@@ -55,7 +55,7 @@ esac
 # 'chroma subsampling mode' mjpegtools >= 1.8.0
 #
 SUBSAMPLINGMODE=""
-if ppmtoy4m -h | egrep -q "'420mpeg2'"; then
+if ppmtoy4m -h 2>&1 | egrep -q "'420mpeg2'"; then
     SUBSAMPLINGMODE="-S 420mpeg2"
 fi
 #

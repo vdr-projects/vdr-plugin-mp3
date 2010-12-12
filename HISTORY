@@ -1,6 +1,12 @@
 VDR Plugin Revision History
 ---------------------------
 
+: Version 0.10.x (vdr 1.6.0-2)
+- Added a setup option to switch prev/next remote keys from chapter jump to
+  playlist jump.
+- Fixed compiling without OGG library.
+- Fixed image_convert.sh.examples for newer mjpegtools.
+
 29.12.2009: Version 0.10.2 (vdr 1.6.0-2)
 - Fixed a segfault while direct song selection. Thanks to Halim Sahin for
   reporting.
