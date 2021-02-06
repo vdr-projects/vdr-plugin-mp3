@@ -632,7 +632,11 @@ void cInfoCache::Action(void)
 
 char *cInfoCache::CacheFile(void)
 {
+#if APIVERSNUM > 20101
+  return AddPath(cachedir?cachedir:cVideoDirectory::Name(),CACHEFILENAME);
+#else
   return AddPath(cachedir?cachedir:VideoDirectory,CACHEFILENAME);
+#endif
 }
 
 void cInfoCache::Save(bool force)

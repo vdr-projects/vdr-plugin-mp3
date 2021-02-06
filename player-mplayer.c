@@ -185,7 +185,11 @@ bool cMPlayerResume::OpenResume(const cFileObj *file)
     if(MPlayerSetup.ResumeMode==1 || 
        (access(s,W_OK) && (errno==EACCES || errno==EROFS))) {
       global=true;
+#if APIVERSNUM > 20101
+      resfile=AddPath(globalResumeDir?globalResumeDir:cVideoDirectory::Name(),GLOBAL_RESUME_FILE);
+#else
       resfile=AddPath(globalResumeDir?globalResumeDir:VideoDirectory,GLOBAL_RESUME_FILE);
+#endif
       d(printf("resume: using global file\n"))
       }
     else {
