@@ -43,7 +43,7 @@ const char *def_usr_img = 0;
 // image suffixes to search
 const char *img_suff[] = { "jpg","png","gif",0 };
 // exclude list for instant playlist creation
-const char *excl_pl[] = { "*"PLAYLISTEXT,"*.jpg","*.gif","*.png",0 };
+const char *excl_pl[] = { "*" PLAYLISTEXT,"*.jpg","*.gif","*.png",0 };
 // exclude list for song browser
 const char *excl_br[] = { ".*","*.jpg","*.gif","*.png",0 };
 
@@ -409,7 +409,7 @@ bool cPlayList::Load(void)
   if(f) {
     char buffer[512];
     result=true;
-    while(fgets(buffer,sizeof(buffer),f)>0) {
+    while(fgets(buffer,sizeof(buffer),f)!=0) {
       if(buffer[0]=='#') {
         if(!strncmp(buffer,WINAMPEXT,strlen(WINAMPEXT))) {
           d(printf("mp3: detected WinAmp style playlist\n"))
@@ -550,7 +550,7 @@ void cInstantPlayList::DoItem(cFileSource *src, const char *subdir, const char *
 
 bool cPlayLists::Load(cFileSource *Source)
 {
-  static const char *spec[] = { "*"PLAYLISTEXT,0 };
+  static const char *spec[] = { "*" PLAYLISTEXT,0 };
   Clear();
   bool res=ScanDir(Source,0,stFile,spec,0,false);
   Sort();
