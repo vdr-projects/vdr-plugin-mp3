@@ -1,7 +1,10 @@
 VDR Plugin Revision History
 ---------------------------
 
-: Version 0.10.x (vdr 1.6.0-2)
+25.05.2021: Version 0.10.4
+- Fix build with GCC 11. Thanks to @martinkg
+
+06.02.2021: Version 0.10.3 (vdr 1.6.0-2)
 - Added a setup option to switch prev/next remote keys from chapter jump to
   playlist jump.
 - Fixed compiling without OGG library.

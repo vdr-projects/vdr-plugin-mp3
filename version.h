@@ -23,7 +23,7 @@
 #define ___VERSION_H
 
 #define PLUGIN_NAME    "VDR-MP3"
-#define PLUGIN_RELEASE "0.10.2"
+#define PLUGIN_RELEASE "0.10.4"
 
 extern const char *PluginVersion;
 
