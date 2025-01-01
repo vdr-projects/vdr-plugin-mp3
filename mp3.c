@@ -281,7 +281,12 @@ void cMP3Control::Stop(void)
 bool cMP3Control::SetPlayList(cPlayList *plist)
 {
   bool res;
+#if APIVERSNUM > 20402
+  cMutexLock ControlMutexLock;
+  cControl *control=cControl::Control(ControlMutexLock);
+#else
   cControl *control=cControl::Control();
+#endif
   // is there a running MP3 player?
   if(control && typeid(*control)==typeid(cMP3Control)) {
     // add songs to running playlist
@@ -1694,7 +1699,12 @@ cString cPluginMp3::SVDRPCommand(const char *Command, const char *Option, int &R
     else { ReplyCode=501; return "Missing filename"; }
     }
   else if(!strcasecmp(Command,"CURR")) {
+#if APIVERSNUM > 20402
+    cMutexLock ControlMutexLock;
+    cControl *control=cControl::Control(ControlMutexLock);
+#else
     cControl *control=cControl::Control();
+#endif
     if(control && typeid(*control)==typeid(cMP3Control)) {
       cMP3PlayInfo mode;
       if(mgr->Info(-1,&mode)) return mode.Filename;
